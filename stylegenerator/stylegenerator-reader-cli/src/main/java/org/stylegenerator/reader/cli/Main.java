@@ -10,8 +10,17 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Main {
+	
+	static Logger logger = LoggerFactory.getLogger(Main.class);
+
+	private static void showOptions(Options options) {
+		HelpFormatter formatter = new HelpFormatter();
+		formatter.printHelp("Main", options);
+	}
 
 	private static Options getOptions() {
 		Options options = new Options();
@@ -23,6 +32,7 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
+		logger.info("Starting ...");
 		CommandLineParser parser = new DefaultParser();
 		Options options = getOptions();
 
@@ -30,7 +40,7 @@ public class Main {
 			CommandLine line = parser.parse(options, args);
 
 			if (!line.hasOption("f") && !line.hasOption("d")) {
-				System.err.println("Please provide at least one file or directory");
+				logger.warn("Please provide at least one file or directory");
 				showOptions(options);
 				return;
 			}
@@ -40,17 +50,13 @@ public class Main {
 			List<String> directories = line.hasOption("d") ? Arrays.asList(line.getOptionValues("d"))
 					: Collections.<String> emptyList();
 
-			System.out.println(files);
-			System.out.println(directories);
+			logger.debug(files.toString());
+			logger.debug(directories.toString());
+			logger.info("Finished");
 		} catch (ParseException e) {
-			e.printStackTrace();
+			logger.error("Invalid Command Line", e);
 			showOptions(options);
 		}
+		
 	}
-
-	private static void showOptions(Options options) {
-		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("Main", options);
-	}
-
 }
