@@ -11,5 +11,10 @@
   <artifactId>stylegenerator-reader</artifactId>
   <name>Style Generator Reader</name>
   <dependencies>
+  <dependency>
+  	<groupId>stylegenerator-core</groupId>
+  	<artifactId>stylegenerator-core</artifactId>
+  	<version>0.0.1-SNAPSHOT</version>
+  </dependency>
   </dependencies>
 </project>
