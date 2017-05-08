@@ -1,7 +1,7 @@
 package org.stylegenerator.reader.cli;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,7 +50,7 @@ public class Main {
 
 		try {
 			return new TextFile(file.getFileName().toString(),
-					new String(Files.readAllBytes(file), Charset.defaultCharset()));
+					new String(Files.readAllBytes(file), StandardCharsets.ISO_8859_1));
 		} catch (IOException e) {
 			throw new RuntimeException("Fail fo read file " + filePath, e);
 		}
