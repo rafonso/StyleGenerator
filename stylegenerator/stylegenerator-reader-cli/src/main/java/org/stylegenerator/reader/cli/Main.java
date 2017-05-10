@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.stylegenerator.reader.TextAnalyzer;
 
+import stylegenerator.core.StyleParameters;
 import stylegenerator.core.TextFile;
 
 public class Main {
@@ -30,8 +31,17 @@ public class Main {
 
 		options.addOption("f", "file", true, "File to be read (*.txt extension)");
 		options.addOption("d", "dir", true, "Directory to read. All *.txt files will be read");
+		options.addOption("c", "coherence", true, "Coherence level");
 
 		return options;
+	}
+	
+	private static StyleParameters getParameters(CommandLine line) {
+		StyleParameters parameters = new StyleParameters();
+		
+		parameters.setCoherence(Integer.valueOf(line.getOptionValue("c", "3")));
+		
+		return parameters;
 	}
 
 	public static void main(String[] args) {
@@ -55,10 +65,12 @@ public class Main {
 
 			logger.debug(filesNames.toString());
 			logger.debug(directoriesNames.toString());
+			
+			StyleParameters parameters = getParameters(line);
 
 			TextAnalyzer analyzer = new TextAnalyzer();
 
-			List<TextFile> textFiles = analyzer.process(filesNames, directoriesNames);
+			List<TextFile> textFiles = analyzer.process(filesNames, directoriesNames, parameters);
 
 			textFiles.forEach(tf -> logger.debug(tf.toString()));
 			logger.info("Finished");

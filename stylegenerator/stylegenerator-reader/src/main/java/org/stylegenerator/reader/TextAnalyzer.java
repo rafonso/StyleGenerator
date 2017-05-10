@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import stylegenerator.core.StyleParameters;
 import stylegenerator.core.TextFile;
 
 public class TextAnalyzer {
@@ -65,12 +66,13 @@ public class TextAnalyzer {
 		return fileNamesStream.map(this::readFile).collect(Collectors.toList());
 	}
 
-	public List<TextFile> process(List<String> filesPath, List<String> directoriesPaths) {
+	public List<TextFile> process(List<String> filesPath, List<String> directoriesPaths, StyleParameters parameters) {
 		List<TextFile> textFilesFromFiles = fileNamesStreamToTextFile(filesPath.stream());
 		List<TextFile> textFilesFomDirectories = fileNamesStreamToTextFile(
 				directoriesPaths.stream().flatMap(this::dirToFilesNames));
 
 		List<TextFile> textFiles = new ArrayList<>(textFilesFromFiles);
+		textFiles.addAll(textFilesFromFiles);
 		textFiles.addAll(textFilesFomDirectories);
 		
 		TextFile textFile = textFiles.get(0);
@@ -86,15 +88,12 @@ public class TextAnalyzer {
 				rawTokens[i - 1] = rawTokens[i - 1] + matcher.group(1);
 				rawTokens[i] = matcher.group(3);
 			}
-//			if(string.startsWith("(\\n|\\r)+")) {
-//				rawTokens[i - 1] = rawTokens[i - 1] + '\n';
-//				rawTokens[i] = string.replaceAll("(\\n|\\r)+", "");
-//			} // ((\n|\r)+)([^ ]*)
 		}
 		
 		List<String> tokens = Arrays.asList(rawTokens);
 		
 		logger.debug(tokens.toString().replaceAll("\\n", "EOL"));
+		logger.debug(parameters.toString());
 
 		return textFiles;
 	}
