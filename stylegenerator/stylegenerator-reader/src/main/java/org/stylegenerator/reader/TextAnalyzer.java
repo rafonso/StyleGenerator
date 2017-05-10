@@ -7,7 +7,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,7 +31,7 @@ public class TextAnalyzer {
 
 		try {
 			return new TextFile(file.getFileName().toString(),
-					new String(Files.readAllBytes(file), StandardCharsets.ISO_8859_1));
+					new String(Files.readAllBytes(file), StandardCharsets.ISO_8859_1).trim());
 		} catch (IOException e) {
 			throw new RuntimeException("Fail fo read file " + filePath, e);
 		}
@@ -69,6 +72,29 @@ public class TextAnalyzer {
 
 		List<TextFile> textFiles = new ArrayList<>(textFilesFromFiles);
 		textFiles.addAll(textFilesFomDirectories);
+		
+		TextFile textFile = textFiles.get(0);
+		
+		Pattern pattern = Pattern.compile("((\\n|\\r)+)([^ ]*)");
+		
+		// CRia uma lista de linhas. Depois tokeniza cada linha e adiciona um '\n' no ultimo token 
+		String[] rawTokens = textFile.getText().split(" ");
+		for (int i = 0; i < rawTokens.length; i++) {
+			String string = rawTokens[i];
+			Matcher matcher = pattern.matcher(string);
+			if(matcher.matches()) {
+				rawTokens[i - 1] = rawTokens[i - 1] + matcher.group(1);
+				rawTokens[i] = matcher.group(3);
+			}
+//			if(string.startsWith("(\\n|\\r)+")) {
+//				rawTokens[i - 1] = rawTokens[i - 1] + '\n';
+//				rawTokens[i] = string.replaceAll("(\\n|\\r)+", "");
+//			} // ((\n|\r)+)([^ ]*)
+		}
+		
+		List<String> tokens = Arrays.asList(rawTokens);
+		
+		logger.debug(tokens.toString().replaceAll("\\n", "EOL"));
 
 		return textFiles;
 	}
