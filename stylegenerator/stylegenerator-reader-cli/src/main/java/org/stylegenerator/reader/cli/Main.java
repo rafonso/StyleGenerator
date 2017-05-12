@@ -19,6 +19,9 @@ import stylegenerator.core.TextFile;
 
 public class Main {
 
+	private static final String COHERENCE_PARAMETER = "c";
+	private static final String DIR_PARAMETER = "d";
+	private static final String FILE_PARAMETER = "f";
 	static Logger logger = LoggerFactory.getLogger(Main.class);
 
 	private static void showOptions(Options options) {
@@ -29,9 +32,9 @@ public class Main {
 	private static Options getOptions() {
 		Options options = new Options();
 
-		options.addOption("f", "file", true, "File to be read (*.txt extension)");
-		options.addOption("d", "dir", true, "Directory to read. All *.txt files will be read");
-		options.addOption("c", "coherence", true, "Coherence level");
+		options.addOption(FILE_PARAMETER, true, "File to be read (*.txt extension)");
+		options.addOption(DIR_PARAMETER, true, "Directory to read. All *.txt files will be read");
+		options.addOption(COHERENCE_PARAMETER, true, "Coherence level (Default = 3)");
 
 		return options;
 	}
@@ -39,7 +42,7 @@ public class Main {
 	private static StyleParameters getParameters(CommandLine line) {
 		StyleParameters parameters = new StyleParameters();
 		
-		parameters.setCoherence(Integer.valueOf(line.getOptionValue("c", "3")));
+		parameters.setCoherence(Integer.valueOf(line.getOptionValue(COHERENCE_PARAMETER, "3")));
 		
 		return parameters;
 	}
@@ -52,15 +55,15 @@ public class Main {
 		try {
 			CommandLine line = parser.parse(options, args);
 
-			if (!line.hasOption("f") && !line.hasOption("d")) {
+			if (!line.hasOption(FILE_PARAMETER) && !line.hasOption(DIR_PARAMETER)) {
 				logger.warn("Please provide at least one file or directory");
 				showOptions(options);
 				return;
 			}
 
-			List<String> filesNames = line.hasOption("f") ? Arrays.asList(line.getOptionValues("f"))
+			List<String> filesNames = line.hasOption(FILE_PARAMETER) ? Arrays.asList(line.getOptionValues(FILE_PARAMETER))
 					: Collections.<String> emptyList();
-			List<String> directoriesNames = line.hasOption("d") ? Arrays.asList(line.getOptionValues("d"))
+			List<String> directoriesNames = line.hasOption(DIR_PARAMETER) ? Arrays.asList(line.getOptionValues(DIR_PARAMETER))
 					: Collections.<String> emptyList();
 
 			logger.debug(filesNames.toString());
@@ -75,7 +78,7 @@ public class Main {
 			textFiles.forEach(tf -> logger.debug(tf.toString()));
 			logger.info("Finished");
 		} catch (ParseException e) {
-			logger.error("Invalid Command Line", e);
+			logger.error("Invalid Command Line: " + e.getMessage(), e);
 			showOptions(options);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
