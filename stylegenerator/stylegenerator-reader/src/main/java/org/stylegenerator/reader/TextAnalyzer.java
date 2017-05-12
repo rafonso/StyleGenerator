@@ -99,6 +99,16 @@ public class TextAnalyzer {
 		return Stream.of(words);
 	}
 
+	private void generateSentenceSequences(TextFile textFile, StyleParameters parameters) {
+		List<String> lines = Stream.of(textFile.getText().split(EOL)).map(s -> s.trim()).collect(Collectors.toList());
+		lines.forEach(line -> logger.trace("'" + line.trim() + "'"));
+	
+		List<String> tokens = lines.stream().flatMap(this::lineToTokens).collect(Collectors.toList());
+		tokens.forEach(t -> logger.trace("'" + t + "'"));
+	
+		this.parseText(tokens, parameters.getCoherence());
+	}
+
 	public List<TextFile> process(List<String> filesPath, List<String> directoriesPaths, StyleParameters parameters) {
 		List<TextFile> textFilesFromFiles = fileNamesStreamToTextFile(filesPath.stream());
 		List<TextFile> textFilesFomDirectories = fileNamesStreamToTextFile(
@@ -108,17 +118,11 @@ public class TextAnalyzer {
 		textFiles.addAll(textFilesFromFiles);
 		textFiles.addAll(textFilesFomDirectories);
 
-		TextFile textFile = textFiles.get(0);
+		
+		textFiles.forEach(tf -> generateSentenceSequences(tf, parameters));
+//		generateSentenceSequences(textFile, parameters);
 
-		List<String> lines = Stream.of(textFile.getText().split(EOL)).map(s -> s.trim()).collect(Collectors.toList());
-		lines.forEach(line -> logger.trace("'" + line.trim() + "'"));
-
-		List<String> tokens = lines.stream().flatMap(this::lineToTokens).collect(Collectors.toList());
-		tokens.forEach(t -> logger.trace("'" + t + "'"));
-
-		this.parseText(tokens, parameters.getCoherence());
-
-		return textFiles;
+		return null;
 	}
 
 }
