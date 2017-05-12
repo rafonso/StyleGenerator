@@ -7,8 +7,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -23,6 +24,10 @@ import stylegenerator.core.TextFile;
 public class TextAnalyzer {
 
 	static Logger logger = LoggerFactory.getLogger(TextAnalyzer.class);
+
+	private static final String EOL = System.getProperty("line.separator");
+
+	private Pattern eolSpacePattern = Pattern.compile("^([^\\r\\n]*\\r\\n) +(.*)$");
 
 	private TextFile readFile(String filePath) {
 		Path file = Paths.get(filePath);
@@ -66,34 +71,52 @@ public class TextAnalyzer {
 		return fileNamesStream.map(this::readFile).collect(Collectors.toList());
 	}
 
+	private String removeEolSpace(String token) {
+		Matcher matcher = eolSpacePattern.matcher(token);
+
+		return matcher.matches() ? (matcher.group(1) + matcher.group(2)) : token;
+	}
+
+	private void parseText(List<String> rawTokens, int coherence) {
+		Queue<String> sentence = new LinkedList<>(rawTokens.subList(0, coherence));
+
+		for (int i = coherence; i < rawTokens.size(); i++) {
+			String currSentence = removeEolSpace(sentence.stream().collect(Collectors.joining(" ")));
+			String sequence = rawTokens.get(i);
+			logger.trace(String.format("\t[%d] '%s' -> '%s'", i, currSentence, sequence));
+			sentence.poll();
+			sentence.add(sequence);
+		}
+	}
+
+	private Stream<String> lineToTokens(String line) {
+		String[] words = line.split("( |\\t)+");
+		for (int i = 0; i < words.length; i++) {
+			words[i] = words[i].trim();
+		}
+		words[words.length - 1] = words[words.length - 1] + EOL;
+
+		return Stream.of(words);
+	}
+
 	public List<TextFile> process(List<String> filesPath, List<String> directoriesPaths, StyleParameters parameters) {
 		List<TextFile> textFilesFromFiles = fileNamesStreamToTextFile(filesPath.stream());
 		List<TextFile> textFilesFomDirectories = fileNamesStreamToTextFile(
 				directoriesPaths.stream().flatMap(this::dirToFilesNames));
 
-		List<TextFile> textFiles = new ArrayList<>(textFilesFromFiles);
+		List<TextFile> textFiles = new ArrayList<>();
 		textFiles.addAll(textFilesFromFiles);
 		textFiles.addAll(textFilesFomDirectories);
-		
+
 		TextFile textFile = textFiles.get(0);
-		
-		Pattern pattern = Pattern.compile("((\\n|\\r)+)([^ ]*)");
-		
-		// CRia uma lista de linhas. Depois tokeniza cada linha e adiciona um '\n' no ultimo token 
-		String[] rawTokens = textFile.getText().split(" ");
-		for (int i = 0; i < rawTokens.length; i++) {
-			String string = rawTokens[i];
-			Matcher matcher = pattern.matcher(string);
-			if(matcher.matches()) {
-				rawTokens[i - 1] = rawTokens[i - 1] + matcher.group(1);
-				rawTokens[i] = matcher.group(3);
-			}
-		}
-		
-		List<String> tokens = Arrays.asList(rawTokens);
-		
-		logger.debug(tokens.toString().replaceAll("\\n", "EOL"));
-		logger.debug(parameters.toString());
+
+		List<String> lines = Stream.of(textFile.getText().split(EOL)).map(s -> s.trim()).collect(Collectors.toList());
+		lines.forEach(line -> logger.trace("'" + line.trim() + "'"));
+
+		List<String> tokens = lines.stream().flatMap(this::lineToTokens).collect(Collectors.toList());
+		tokens.forEach(t -> logger.trace("'" + t + "'"));
+
+		this.parseText(tokens, parameters.getCoherence());
 
 		return textFiles;
 	}
