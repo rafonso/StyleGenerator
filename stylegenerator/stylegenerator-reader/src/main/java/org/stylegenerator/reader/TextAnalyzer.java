@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import stylegenerator.core.SentenceSequences;
 import stylegenerator.core.StyleParameters;
 import stylegenerator.core.TextFile;
 
@@ -28,6 +29,10 @@ public class TextAnalyzer {
 	private static final String EOL = System.getProperty("line.separator");
 
 	private Pattern eolSpacePattern = Pattern.compile("^([^\\r\\n]*\\r\\n) +(.*)$");
+
+	/*
+	 * Getting Text Files - BEGIN
+	 */
 
 	private TextFile readFile(String filePath) {
 		Path file = Paths.get(filePath);
@@ -71,22 +76,46 @@ public class TextAnalyzer {
 		return fileNamesStream.map(this::readFile).collect(Collectors.toList());
 	}
 
+	private List<TextFile> getTextFiles(List<String> filesPath, List<String> directoriesPaths) {
+		List<TextFile> textFilesFromFiles = fileNamesStreamToTextFile(filesPath.stream());
+		List<TextFile> textFilesFomDirectories = fileNamesStreamToTextFile(
+				directoriesPaths.stream().flatMap(this::dirToFilesNames));
+
+		List<TextFile> textFiles = new ArrayList<>();
+		textFiles.addAll(textFilesFromFiles);
+		textFiles.addAll(textFilesFomDirectories);
+		return textFiles;
+	}
+
+	/*
+	 * Getting Text Files - END
+	 */
+
+	/*
+	 * Getting Setence Sequences - BEGIN
+	 */
+
 	private String removeEolSpace(String token) {
 		Matcher matcher = eolSpacePattern.matcher(token);
 
 		return matcher.matches() ? (matcher.group(1) + matcher.group(2)) : token;
 	}
 
-	private void parseText(List<String> rawTokens, int coherence) {
+	private List<SentenceSequences> parseText(List<String> rawTokens, int coherence) {
 		Queue<String> sentence = new LinkedList<>(rawTokens.subList(0, coherence));
+		List<SentenceSequences> sentences = new ArrayList<>();
 
 		for (int i = coherence; i < rawTokens.size(); i++) {
 			String currSentence = removeEolSpace(sentence.stream().collect(Collectors.joining(" ")));
 			String sequence = rawTokens.get(i);
-			logger.trace(String.format("\t[%d] '%s' -> '%s'", i, currSentence, sequence));
+
+			sentences.add(new SentenceSequences(currSentence, sequence));
+
 			sentence.poll();
 			sentence.add(sequence);
 		}
+
+		return sentences;
 	}
 
 	private Stream<String> lineToTokens(String line) {
@@ -99,28 +128,51 @@ public class TextAnalyzer {
 		return Stream.of(words);
 	}
 
-	private void generateSentenceSequences(TextFile textFile, StyleParameters parameters) {
-		List<String> lines = Stream.of(textFile.getText().split(EOL)).map(s -> s.trim()).collect(Collectors.toList());
-		lines.forEach(line -> logger.trace("'" + line.trim() + "'"));
-	
-		List<String> tokens = lines.stream().flatMap(this::lineToTokens).collect(Collectors.toList());
-		tokens.forEach(t -> logger.trace("'" + t + "'"));
-	
-		this.parseText(tokens, parameters.getCoherence());
+	private Stream<SentenceSequences> generateSentenceSequences(TextFile textFile, int coherence) {
+		List<String> tokens = Stream.of(textFile.getText().split(EOL)) //
+				.map(String::trim) //
+				.flatMap(this::lineToTokens) //
+				.collect(Collectors.toList());
+
+		return this.parseText(tokens, coherence).stream();
 	}
 
+	/*
+	 * Getting Setence Sequences - END
+	 */
+
+	/*
+	 * Organizing Setence Sequences - BEGIN
+	 */
+
+	private List<SentenceSequences> getSetenceSequencesComplete(List<SentenceSequences> sentenceSequences) {
+		List<SentenceSequences> sentenceSequencesComplete = new ArrayList<>();
+		for (SentenceSequences sentenceSequences2 : sentenceSequences) {
+			int index = sentenceSequencesComplete.indexOf(sentenceSequences2);
+			if (index >= 0) {
+				sentenceSequencesComplete.get(index).addSequence(sentenceSequences2.getSequences().get(0));
+			} else {
+				sentenceSequencesComplete.add(sentenceSequences2);
+			}
+		}
+		return sentenceSequencesComplete;
+	}
+
+	/*
+	 * Organizing Setence Sequences - END
+	 */
+
 	public List<TextFile> process(List<String> filesPath, List<String> directoriesPaths, StyleParameters parameters) {
-		List<TextFile> textFilesFromFiles = fileNamesStreamToTextFile(filesPath.stream());
-		List<TextFile> textFilesFomDirectories = fileNamesStreamToTextFile(
-				directoriesPaths.stream().flatMap(this::dirToFilesNames));
+		List<TextFile> textFiles = getTextFiles(filesPath, directoriesPaths);
 
-		List<TextFile> textFiles = new ArrayList<>();
-		textFiles.addAll(textFilesFromFiles);
-		textFiles.addAll(textFilesFomDirectories);
+		List<SentenceSequences> sentenceSequences = textFiles.stream() //
+				.flatMap(tf -> generateSentenceSequences(tf, parameters.getCoherence())) //
+				.sorted() //
+				.collect(Collectors.toList());
 
-		
-		textFiles.forEach(tf -> generateSentenceSequences(tf, parameters));
-//		generateSentenceSequences(textFile, parameters);
+		List<SentenceSequences> sentenceSequencesComplete = getSetenceSequencesComplete(sentenceSequences);
+
+		sentenceSequencesComplete.forEach(ss -> logger.trace(ss.toString()));
 
 		return null;
 	}
