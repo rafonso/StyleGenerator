@@ -18,7 +18,10 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import stylegenerator.core.SentenceSequences;
+import stylegenerator.core.Sentence;
+import stylegenerator.core.SentencePosition;
+import stylegenerator.core.Sequence;
+import stylegenerator.core.SequencePosition;
 import stylegenerator.core.StyleParameters;
 import stylegenerator.core.TextFile;
 
@@ -101,18 +104,47 @@ public class TextAnalyzer {
 		return matcher.matches() ? (matcher.group(1) + matcher.group(2)) : token;
 	}
 
-	private List<SentenceSequences> parseText(List<String> rawTokens, int coherence) {
+	private SentencePosition getSentencePosition(int i, String word, String priorWord) {
+		if (priorWord == null) {
+			return SentencePosition.BOT;
+		}
+		if (priorWord.endsWith(EOL)) {
+			return SentencePosition.BOL;
+		}
+		if (priorWord.endsWith(".")) {
+			return SentencePosition.BOP;
+		}
+		return SentencePosition.NONE;
+	}
+
+	private SequencePosition getSequencePosition(int i, String word, int textSize) {
+		if (i == textSize - 1) {
+			return SequencePosition.EOT;
+		}
+		if (word.endsWith(EOL)) {
+			return SequencePosition.EOL;
+		}
+		if (word.endsWith(".")) {
+			return SequencePosition.EOP;
+		}
+		return SequencePosition.NONE;
+	}
+
+	private List<Sentence> parseText(List<String> rawTokens, int coherence) {
 		Queue<String> sentence = new LinkedList<>(rawTokens.subList(0, coherence));
-		List<SentenceSequences> sentences = new ArrayList<>();
+		List<Sentence> sentences = new ArrayList<>();
+		String priorWord = null;
 
 		for (int i = coherence; i < rawTokens.size(); i++) {
 			String currSentence = removeEolSpace(sentence.stream().collect(Collectors.joining(" ")));
-			String sequence = rawTokens.get(i);
+			String word = rawTokens.get(i);
 
-			sentences.add(new SentenceSequences(currSentence, sequence));
+			SentencePosition sentencePosition = this.getSentencePosition(i, word, priorWord);
+			SequencePosition sequencePosition = this.getSequencePosition(i, word, rawTokens.size());
+			sentences.add(new Sentence(currSentence, sentencePosition, new Sequence(word, sequencePosition)));
 
-			sentence.poll();
-			sentence.add(sequence);
+			priorWord = sentence.poll();
+			sentence.add(word);
 		}
 
 		return sentences;
@@ -128,7 +160,7 @@ public class TextAnalyzer {
 		return Stream.of(words);
 	}
 
-	private Stream<SentenceSequences> generateSentenceSequences(TextFile textFile, int coherence) {
+	private Stream<Sentence> generateSentenceSequences(TextFile textFile, int coherence) {
 		List<String> tokens = Stream.of(textFile.getText().split(EOL)) //
 				.map(String::trim) //
 				.flatMap(this::lineToTokens) //
@@ -145,9 +177,9 @@ public class TextAnalyzer {
 	 * Organizing Setence Sequences - BEGIN
 	 */
 
-	private List<SentenceSequences> getSetenceSequencesComplete(List<SentenceSequences> sentenceSequences) {
-		List<SentenceSequences> sentenceSequencesComplete = new ArrayList<>();
-		for (SentenceSequences sentenceSequences2 : sentenceSequences) {
+	private List<Sentence> getSetenceSequencesComplete(List<Sentence> sentenceSequences) {
+		List<Sentence> sentenceSequencesComplete = new ArrayList<>();
+		for (Sentence sentenceSequences2 : sentenceSequences) {
 			int index = sentenceSequencesComplete.indexOf(sentenceSequences2);
 			if (index >= 0) {
 				sentenceSequencesComplete.get(index).addSequence(sentenceSequences2.getSequences().get(0));
@@ -165,12 +197,12 @@ public class TextAnalyzer {
 	public List<TextFile> process(List<String> filesPath, List<String> directoriesPaths, StyleParameters parameters) {
 		List<TextFile> textFiles = getTextFiles(filesPath, directoriesPaths);
 
-		List<SentenceSequences> sentenceSequences = textFiles.stream() //
+		List<Sentence> sentenceSequences = textFiles.stream() //
 				.flatMap(tf -> generateSentenceSequences(tf, parameters.getCoherence())) //
 				.sorted() //
 				.collect(Collectors.toList());
 
-		List<SentenceSequences> sentenceSequencesComplete = getSetenceSequencesComplete(sentenceSequences);
+		List<Sentence> sentenceSequencesComplete = getSetenceSequencesComplete(sentenceSequences);
 
 		sentenceSequencesComplete.forEach(ss -> logger.trace(ss.toString()));
 
