@@ -22,7 +22,6 @@ import stylegenerator.core.Sentence;
 import stylegenerator.core.SentencePosition;
 import stylegenerator.core.Sequence;
 import stylegenerator.core.SequencePosition;
-import stylegenerator.core.StyleParameters;
 import stylegenerator.core.TextFile;
 
 public class TextAnalyzer {
@@ -194,11 +193,11 @@ public class TextAnalyzer {
 	 * Organizing Setence Sequences - END
 	 */
 
-	public List<Sentence> process(List<String> filesPath, List<String> directoriesPaths, StyleParameters parameters) {
+	public List<Sentence> process(List<String> filesPath, List<String> directoriesPaths, int coherence) {
 		List<TextFile> textFiles = getTextFiles(filesPath, directoriesPaths);
 
 		List<Sentence> sentenceSequences = textFiles.stream() //
-				.flatMap(tf -> generateSentenceSequences(tf, parameters.getCoherence())) //
+				.flatMap(tf -> generateSentenceSequences(tf, coherence)) //
 				.sorted() //
 				.collect(Collectors.toList());
 

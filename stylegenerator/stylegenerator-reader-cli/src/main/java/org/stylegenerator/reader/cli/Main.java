@@ -17,7 +17,6 @@ import org.stylegenerator.reader.TextAnalyzer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import stylegenerator.core.Sentence;
-import stylegenerator.core.StyleParameters;
 
 public class Main {
 
@@ -39,14 +38,6 @@ public class Main {
 		options.addOption(COHERENCE_PARAMETER, true, "Coherence level (Default = 3)");
 
 		return options;
-	}
-	
-	private static StyleParameters getParameters(CommandLine line) {
-		StyleParameters parameters = new StyleParameters();
-		
-		parameters.setCoherence(Integer.valueOf(line.getOptionValue(COHERENCE_PARAMETER, "3")));
-		
-		return parameters;
 	}
 
 	public static void main(String[] args) {
@@ -71,11 +62,12 @@ public class Main {
 			logger.debug(filesNames.toString());
 			logger.debug(directoriesNames.toString());
 			
-			StyleParameters parameters = getParameters(line);
+			
+			Integer coherence = Integer.valueOf(line.getOptionValue(COHERENCE_PARAMETER, "3"));
 
 			TextAnalyzer analyzer = new TextAnalyzer();
 
-			List<Sentence> sentences = analyzer.process(filesNames, directoriesNames, parameters);
+			List<Sentence> sentences = analyzer.process(filesNames, directoriesNames, coherence);
 
 			sentences.forEach(tf -> logger.debug(tf.toString()));
 			
