@@ -14,8 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.stylegenerator.reader.TextAnalyzer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import stylegenerator.core.Sentence;
 import stylegenerator.core.StyleParameters;
-import stylegenerator.core.TextFile;
 
 public class Main {
 
@@ -73,9 +75,16 @@ public class Main {
 
 			TextAnalyzer analyzer = new TextAnalyzer();
 
-			List<TextFile> textFiles = analyzer.process(filesNames, directoriesNames, parameters);
+			List<Sentence> sentences = analyzer.process(filesNames, directoriesNames, parameters);
 
-			textFiles.forEach(tf -> logger.debug(tf.toString()));
+			sentences.forEach(tf -> logger.debug(tf.toString()));
+			
+			ObjectMapper mapper = new ObjectMapper();
+			
+			String json = mapper.writeValueAsString(sentences);
+			
+			logger.debug(json);
+			
 			logger.info("Finished");
 		} catch (ParseException e) {
 			logger.error("Invalid Command Line: " + e.getMessage(), e);

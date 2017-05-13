@@ -194,7 +194,7 @@ public class TextAnalyzer {
 	 * Organizing Setence Sequences - END
 	 */
 
-	public List<TextFile> process(List<String> filesPath, List<String> directoriesPaths, StyleParameters parameters) {
+	public List<Sentence> process(List<String> filesPath, List<String> directoriesPaths, StyleParameters parameters) {
 		List<TextFile> textFiles = getTextFiles(filesPath, directoriesPaths);
 
 		List<Sentence> sentenceSequences = textFiles.stream() //
@@ -204,9 +204,9 @@ public class TextAnalyzer {
 
 		List<Sentence> sentenceSequencesComplete = getSetenceSequencesComplete(sentenceSequences);
 
-		sentenceSequencesComplete.forEach(ss -> logger.trace(ss.toString()));
+//		sentenceSequencesComplete.forEach(ss -> logger.trace(ss.toString()));
 
-		return null;
+		return sentenceSequencesComplete;
 	}
 
 }
