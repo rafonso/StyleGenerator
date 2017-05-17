@@ -12,11 +12,11 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.stylegenerator.reader.TextAnalyzer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import stylegenerator.core.Sentence;
+import stylegenerator.reader.TextsToStyle;
 
 public class Main {
 
@@ -65,7 +65,7 @@ public class Main {
 			
 			Integer coherence = Integer.valueOf(line.getOptionValue(COHERENCE_PARAMETER, "3"));
 
-			TextAnalyzer analyzer = new TextAnalyzer();
+			TextsToStyle analyzer = new TextsToStyle();
 
 			List<Sentence> sentences = analyzer.process(filesNames, directoriesNames, coherence);
 

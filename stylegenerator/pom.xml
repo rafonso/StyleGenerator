@@ -56,7 +56,7 @@
 
 	<modules>
 		<module>stylegenerator-core</module>
-		<module>stylegenerator-reader</module>
+		
 		<module>stylegenerator-writer</module>
 		<module>stylegenerator-reader-cli</module>
 		<module>stylegenerator-writer-cli</module>

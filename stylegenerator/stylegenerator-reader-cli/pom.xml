@@ -13,11 +13,6 @@
 	<name>Style Generator Reader CLI</name>
 	<dependencies>
 		<dependency>
-			<groupId>stylegenerator-reader</groupId>
-			<artifactId>stylegenerator-reader</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
 			<groupId>stylegenerator-core</groupId>
 			<artifactId>stylegenerator-core</artifactId>
 			<version>0.0.1-SNAPSHOT</version>

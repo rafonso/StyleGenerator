@@ -1,4 +1,4 @@
-package org.stylegenerator.reader;
+package stylegenerator.reader;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -20,7 +20,7 @@ import stylegenerator.core.TextFile;
 import stylegenerator.core.Word;
 
 @Slf4j
-public class TextAnalyzer {
+public class TextsToStyle {
 
 	private static final String EOL = System.getProperty("line.separator");
 
