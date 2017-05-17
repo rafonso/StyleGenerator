@@ -6,3 +6,4 @@ sandbox/
 **/.classpath
 **/.project
 *.log
+*.json
