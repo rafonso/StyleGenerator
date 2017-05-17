@@ -7,11 +7,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -19,10 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import stylegenerator.core.Sentence;
-import stylegenerator.core.SentencePosition;
-import stylegenerator.core.Sequence;
-import stylegenerator.core.SequencePosition;
 import stylegenerator.core.TextFile;
+import stylegenerator.core.Word;
 
 public class TextAnalyzer {
 
@@ -30,7 +27,7 @@ public class TextAnalyzer {
 
 	private static final String EOL = System.getProperty("line.separator");
 
-	private Pattern eolSpacePattern = Pattern.compile("^([^\\r\\n]*\\r\\n) +(.*)$");
+	
 
 	/*
 	 * Getting Text Files - BEGIN
@@ -97,56 +94,58 @@ public class TextAnalyzer {
 	 * Getting Setence Sequences - BEGIN
 	 */
 
-	private String removeEolSpace(String token) {
-		Matcher matcher = eolSpacePattern.matcher(token);
+	private List<Sentence> parseText(List<Word> words, int coherence) {
+		Queue<Word> wordQueue = new LinkedList<>();
+		Iterator<Word> itWords = words.iterator();
+		while (wordQueue.size() < coherence) {
+			wordQueue.add(itWords.next());
+		}
 
-		return matcher.matches() ? (matcher.group(1) + matcher.group(2)) : token;
-	}
-
-	private SentencePosition getSentencePosition(int i, String word, String priorWord) {
-		if (priorWord == null) {
-			return SentencePosition.BOT;
-		}
-		if (priorWord.endsWith(EOL)) {
-			return SentencePosition.BOL;
-		}
-		if (priorWord.endsWith(".")) {
-			return SentencePosition.BOP;
-		}
-		return SentencePosition.NONE;
-	}
-
-	private SequencePosition getSequencePosition(int i, String word, int textSize) {
-		if (i == textSize - 1) {
-			return SequencePosition.EOT;
-		}
-		if (word.endsWith(EOL)) {
-			return SequencePosition.EOL;
-		}
-		if (word.endsWith(".")) {
-			return SequencePosition.EOP;
-		}
-		return SequencePosition.NONE;
-	}
-
-	private List<Sentence> parseText(List<String> rawTokens, int coherence) {
-		Queue<String> sentence = new LinkedList<>(rawTokens.subList(0, coherence));
 		List<Sentence> sentences = new ArrayList<>();
-		String priorWord = null;
+		while (itWords.hasNext()) {
+			Word sequence = itWords.next();
+			Sentence sentence = new Sentence(new ArrayList<>(wordQueue));
+			sentence.addSequence(sequence);
 
-		for (int i = coherence; i < rawTokens.size(); i++) {
-			String currSentence = removeEolSpace(sentence.stream().collect(Collectors.joining(" ")));
-			String word = rawTokens.get(i);
+			sentences.add(sentence);
 
-			SentencePosition sentencePosition = this.getSentencePosition(i, word, priorWord);
-			SequencePosition sequencePosition = this.getSequencePosition(i, word, rawTokens.size());
-			sentences.add(new Sentence(currSentence, sentencePosition, new Sequence(word, sequencePosition)));
-
-			priorWord = sentence.poll();
-			sentence.add(word);
+			wordQueue.poll();
+			wordQueue.add(sequence);
 		}
 
 		return sentences;
+	}
+
+	private Word tokenToWord(String token, Word priorWord, boolean eot) {
+		boolean eol = false;
+		if (token.endsWith(EOL)) {
+			token = token.replace(EOL, "");
+			eol = true;
+		}
+
+		Word word = new Word(token);
+		word.setBot(priorWord == null);
+		word.setBol(word.isBot() || priorWord.isEol());
+		word.setBop(word.isBol() || priorWord.isEop());
+		word.setEot(eot);
+		word.setEol(word.isEot() || eol);
+		word.setEop(token.endsWith(".") || token.endsWith("?") || token.endsWith("!"));
+
+		return word;
+	}
+
+	private List<Word> tokensToWords(List<String> tokens) {
+		List<Word> words = new ArrayList<>(tokens.size());
+		Word priorWord = null;
+
+		for (Iterator<String> itToken = tokens.iterator(); itToken.hasNext();) {
+			Word word = tokenToWord(itToken.next(), priorWord, !itToken.hasNext());
+
+			words.add(word);
+			priorWord = word;
+		}
+
+		return words;
 	}
 
 	private Stream<String> lineToTokens(String line) {
@@ -159,13 +158,23 @@ public class TextAnalyzer {
 		return Stream.of(words);
 	}
 
-	private Stream<Sentence> generateSentenceSequences(TextFile textFile, int coherence) {
+	private Stream<Sentence> generateFileSentences(TextFile textFile, int coherence) {
 		List<String> tokens = Stream.of(textFile.getText().split(EOL)) //
 				.map(String::trim) //
 				.flatMap(this::lineToTokens) //
 				.collect(Collectors.toList());
 
-		return this.parseText(tokens, coherence).stream();
+//		logger.debug(tokens.stream().collect(Collectors.joining("', '", "'", "'")));
+
+		List<Word> words = tokensToWords(tokens);
+
+//		logger.debug(words.toString());
+
+		 List<Sentence> sentences = this.parseText(words, coherence);
+//		 sentences.forEach(s -> logger.debug(s.toString()));
+		 
+		 
+		return sentences.stream();
 	}
 
 	/*
@@ -197,13 +206,15 @@ public class TextAnalyzer {
 		List<TextFile> textFiles = getTextFiles(filesPath, directoriesPaths);
 
 		List<Sentence> sentenceSequences = textFiles.stream() //
-				.flatMap(tf -> generateSentenceSequences(tf, coherence)) //
+				.flatMap(tf -> generateFileSentences(tf, coherence)) //
 				.sorted() //
 				.collect(Collectors.toList());
 
 		List<Sentence> sentenceSequencesComplete = getSetenceSequencesComplete(sentenceSequences);
+		
+		sentenceSequencesComplete.stream().filter(s -> s.getSequences().size() > 1).forEach(System.out::println);
 
-//		sentenceSequencesComplete.forEach(ss -> logger.trace(ss.toString()));
+		// sentenceSequencesComplete.forEach(ss -> logger.trace(ss.toString()));
 
 		return sentenceSequencesComplete;
 	}
