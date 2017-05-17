@@ -14,20 +14,15 @@ import java.util.Queue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import lombok.extern.slf4j.Slf4j;
 import stylegenerator.core.Sentence;
 import stylegenerator.core.TextFile;
 import stylegenerator.core.Word;
 
+@Slf4j
 public class TextAnalyzer {
 
-	static Logger logger = LoggerFactory.getLogger(TextAnalyzer.class);
-
 	private static final String EOL = System.getProperty("line.separator");
-
-	
 
 	/*
 	 * Getting Text Files - BEGIN
@@ -65,7 +60,7 @@ public class TextAnalyzer {
 			throw new RuntimeException(ex);
 		}
 		if (fileNames.isEmpty()) {
-			logger.warn("There is no *.txt files in directory " + dirPath);
+			log.warn("There is no *.txt files in directory " + dirPath);
 		}
 
 		return fileNames.stream();
@@ -164,16 +159,9 @@ public class TextAnalyzer {
 				.flatMap(this::lineToTokens) //
 				.collect(Collectors.toList());
 
-//		logger.debug(tokens.stream().collect(Collectors.joining("', '", "'", "'")));
-
 		List<Word> words = tokensToWords(tokens);
+		List<Sentence> sentences = this.parseText(words, coherence);
 
-//		logger.debug(words.toString());
-
-		 List<Sentence> sentences = this.parseText(words, coherence);
-//		 sentences.forEach(s -> logger.debug(s.toString()));
-		 
-		 
 		return sentences.stream();
 	}
 
@@ -211,10 +199,8 @@ public class TextAnalyzer {
 				.collect(Collectors.toList());
 
 		List<Sentence> sentenceSequencesComplete = getSetenceSequencesComplete(sentenceSequences);
-		
-		sentenceSequencesComplete.stream().filter(s -> s.getSequences().size() > 1).forEach(System.out::println);
 
-		// sentenceSequencesComplete.forEach(ss -> logger.trace(ss.toString()));
+		sentenceSequencesComplete.stream().filter(s -> s.getSequences().size() > 1).forEach(System.out::println);
 
 		return sentenceSequencesComplete;
 	}
