@@ -1,13 +1,13 @@
 package org.stylegenerator.reader.cli;
 
 import java.io.File;
-import java.time.Instant;
-import java.time.LocalDate;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -21,7 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import stylegenerator.core.Constants;
 import stylegenerator.core.Sentence;
-import stylegenerator.reader.TextsToStyle;
+import stylegenerator.reader.SentencesMerger;
+import stylegenerator.reader.TextFileToSentences;
 
 @Slf4j
 public class Main {
@@ -62,7 +63,6 @@ public class Main {
 				: fileName;
 
 		return new File(outputDir, outputFileName + Constants.FILE_STYLE_EXTENSION);
-
 	}
 
 	public static void main(String[] args) {
@@ -74,10 +74,9 @@ public class Main {
 			CommandLine line = parser.parse(options, args);
 
 			if (!line.hasOption(FILE_PARAMETER) && !line.hasOption(DIR_PARAMETER)) {
-				log.warn("Please provide at least one file or directory");
-				showOptions(options);
-				return;
+				throw new IllegalArgumentException("Please provide at least one file or directory");
 			}
+
 			File outputFile = prepareOutputFile(line.getOptionValue(OUTPUT_DIR_PARAMETER),
 					line.getOptionValue(OUTPUT_FILE_PARAMETER));
 
@@ -91,25 +90,30 @@ public class Main {
 
 			Integer coherence = Integer.valueOf(line.getOptionValue(COHERENCE_PARAMETER, "3"));
 
-			TextsToStyle analyzer = new TextsToStyle();
+			List<Sentence> sentences = Stream //
+					.concat(filesNames.stream(), directoriesNames.stream().flatMap(new DirPathToFilesPath())) //
+					.map(Paths::get) //
+					.map(new PathToTextFileFunction()) //
+					.map(new TextFileToSentences(coherence)) //
+					.collect(new SentencesMerger());
 
-			List<Sentence> sentences = analyzer.process(filesNames, directoriesNames, coherence);
-
-			sentences.forEach(tf -> log.debug(tf.toString()));
+			sentences.stream().filter(s -> s.getSequences().size() > 1).forEach(System.out::println);
 
 			ObjectMapper mapper = new ObjectMapper();
 
 			mapper.writerWithDefaultPrettyPrinter().writeValue(outputFile, sentences);
 
-			log.debug("Style file {} Created", outputFile.getAbsolutePath());
+			log.info("Style file {} Created", outputFile.getAbsolutePath());
 
 			log.info("Finished");
 		} catch (ParseException e) {
 			log.error("Invalid Command Line: " + e.getMessage(), e);
 			showOptions(options);
+		} catch (IllegalArgumentException e) {
+			log.error(e.getMessage());
+			showOptions(options);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
-
 	}
 }
