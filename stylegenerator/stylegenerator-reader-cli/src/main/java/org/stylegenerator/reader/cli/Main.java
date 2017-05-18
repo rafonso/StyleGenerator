@@ -51,7 +51,7 @@ public class Main {
 		return options;
 	}
 
-	private static File prepareOutputFile(String dirPath, String fileName) {
+	private static File prepareOutputFile(String dirPath, String fileName, int coherence) {
 		File outputDir = (dirPath == null) ? new File(".") : new File(dirPath);
 		if (!outputDir.exists() || !outputDir.isDirectory()) {
 			throw new IllegalArgumentException(
@@ -62,7 +62,7 @@ public class Main {
 				? LocalDateTime.now().format(DateTimeFormatter.ofPattern(Constants.DEFAULT_FILE_NAME_PATTERN))
 				: fileName;
 
-		return new File(outputDir, outputFileName + Constants.FILE_STYLE_EXTENSION);
+		return new File(outputDir, outputFileName + "." + coherence + Constants.FILE_STYLE_EXTENSION);
 	}
 
 	public static void main(String[] args) {
@@ -77,8 +77,9 @@ public class Main {
 				throw new IllegalArgumentException("Please provide at least one file or directory");
 			}
 
+			Integer coherence = Integer.valueOf(line.getOptionValue(COHERENCE_PARAMETER, "3"));
 			File outputFile = prepareOutputFile(line.getOptionValue(OUTPUT_DIR_PARAMETER),
-					line.getOptionValue(OUTPUT_FILE_PARAMETER));
+					line.getOptionValue(OUTPUT_FILE_PARAMETER), coherence);
 
 			List<String> filesNames = line.hasOption(FILE_PARAMETER)
 					? Arrays.asList(line.getOptionValues(FILE_PARAMETER)) : Collections.<String> emptyList();
@@ -88,7 +89,6 @@ public class Main {
 			log.debug(filesNames.toString());
 			log.debug(directoriesNames.toString());
 
-			Integer coherence = Integer.valueOf(line.getOptionValue(COHERENCE_PARAMETER, "3"));
 
 			List<Sentence> sentences = Stream //
 					.concat(filesNames.stream(), directoriesNames.stream().flatMap(new DirPathToFilesPath())) //
