@@ -29,6 +29,8 @@ public class Main {
 	private static final String WAIT_FOR_END_OF_TEXT = "eot";
 	private static final String WORDS_QUANTITY_PARAMETER = "w";
 	private static final String WAIT_FOR_END_OF_PHRASE_PARAMETER = "weop";
+	private static final String PHRASES_QUANTITY_PARAMETER = "p";
+	private static final String LINES_QUANTITY_PARAMETER = "l";
 
 	private static void showOptions(Options options) {
 		HelpFormatter formatter = new HelpFormatter();
@@ -43,16 +45,27 @@ public class Main {
 		options.addOption(WORDS_QUANTITY_PARAMETER, true, "Quantity of words to be generated");
 		options.addOption(WAIT_FOR_END_OF_PHRASE_PARAMETER, false,
 				"Wait for end of phrase if Quantity of words is chosen");
+		options.addOption(PHRASES_QUANTITY_PARAMETER, true, "Quantity of phrases to be generated");
+		options.addOption(LINES_QUANTITY_PARAMETER, true, "Quantity of lines to be generated");
 
 		return options;
+	}
+
+	private static Integer commandToInteger(CommandLine line, String parameter) {
+		if (line.hasOption(parameter)) {
+			return Integer.parseInt(line.getOptionValue(parameter));
+		}
+
+		return null;
 	}
 
 	private static StyleParameters commandLineToStyleParameters(CommandLine line) {
 		StyleParameters styleParameters = StyleParameters.builder() //
 				.waitForEndOfText(line.hasOption(WAIT_FOR_END_OF_TEXT)) //
-				.quantityOfWords(line.hasOption(WORDS_QUANTITY_PARAMETER)
-						? Integer.parseInt(line.getOptionValue(WORDS_QUANTITY_PARAMETER)) : null)
+				.quantityOfWords(commandToInteger(line, WORDS_QUANTITY_PARAMETER))
 				.waitForEndOfPrhase(line.hasOption(WAIT_FOR_END_OF_PHRASE_PARAMETER)) //
+				.quantityOfPhrases(commandToInteger(line, PHRASES_QUANTITY_PARAMETER))
+				.quantityOfLines(commandToInteger(line, LINES_QUANTITY_PARAMETER)) //
 				.build();
 		return styleParameters;
 	}
@@ -100,13 +113,13 @@ public class Main {
 			log.debug(styleParameters.toString());
 
 			List<Sentence> sentences = readStyleFile(line.getOptionValue(FILE_PARAMETER));
-			
-//			log.debug(sentences.toString());
-			
+
+			// log.debug(sentences.toString());
+
 			TextGenerator textGenerator = new TextGenerator();
-			
+
 			String text = textGenerator.generateText(sentences, styleParameters);
-			
+
 			log.debug(text);
 
 			log.info("Finished");

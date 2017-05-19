@@ -16,52 +16,54 @@ import stylegenerator.core.Word;
 @Slf4j
 public class TextGenerator {
 
-	private Predicate<Sentence> getStarterFilter(StyleParameters styleParameters) {
-		if (styleParameters.isWaitForEndOfText()) {
+	private Predicate<Sentence> getStarterFilter(StyleParameters parameters) {
+		if (parameters.isWaitForEndOfText()) {
 			return Sentence::isBot;
 		}
-		if (styleParameters.getQuantityOfWords() != null) { // qtyOfPhrases,
-															// qtyOfLines
+		if ((parameters.getQuantityOfWords() != null) //
+				|| (parameters.getQuantityOfPhrases() != null) //
+				|| (parameters.getQuantityOfLines() != null)) {
 			return Sentence::isBol;
 		}
 
-		throw new IllegalStateException("No Begin of text filter defined. Parameters: " + styleParameters);
+		throw new IllegalStateException("No Begin of text filter defined. Parameters: " + parameters);
 	}
 
-	private TextTerminator getTerminator(StyleParameters styleParameters) {
-		if (styleParameters.isWaitForEndOfText()) {
+	private TextTerminator getTerminator(StyleParameters parameters) {
+		if (parameters.isWaitForEndOfText()) {
 			return new EndOfTextTerminator();
 		}
-		if (styleParameters.getQuantityOfWords() != null) {
-			if (styleParameters.isWaitForEndOfPrhase()) {
-				return new QuantityOfWordsEndOfPhraseTerminator(styleParameters.getQuantityOfWords());
+		if (parameters.getQuantityOfWords() != null) {
+			if (parameters.isWaitForEndOfPrhase()) {
+				return new QuantityOfWordsEndOfPhraseTerminator(parameters.getQuantityOfWords());
 			}
-			return new QuantityOfWordsTerminator(styleParameters.getQuantityOfWords());
+			return new QuantityOfWordsTerminator(parameters.getQuantityOfWords());
+		}
+		if (parameters.getQuantityOfPhrases() != null) {
+			return new QuantityOfPhrasesTerminator(parameters.getQuantityOfPhrases());
+		}
+		if (parameters.getQuantityOfLines() != null) {
+			return new QuantityOfLinesTerminator(parameters.getQuantityOfLines());
 		}
 
-		throw new IllegalStateException("No text terminator defined. Parameters: " + styleParameters);
+		throw new IllegalStateException("No text terminator defined. Parameters: " + parameters);
 	}
 
-	private Sentence getInitialSentence(List<Sentence> sentences, StyleParameters styleParameters) {
-		List<Sentence> initialsSentences = sentences.stream().filter(getStarterFilter(styleParameters))
+	private Sentence getInitialSentence(List<Sentence> sentences, StyleParameters parameters) {
+		List<Sentence> initialsSentences = sentences.stream().filter(getStarterFilter(parameters))
 				.collect(Collectors.toList());
-//		log.debug("Initial Sentences: {}", initialsSentences);
+		// log.debug("Initial Sentences: {}", initialsSentences);
 
 		int initialIndex = Constants.RANDOM.nextInt(initialsSentences.size());
-//		log.debug("index: {}", initialIndex);
+		// log.debug("index: {}", initialIndex);
 		Sentence initialSentence = initialsSentences.get(initialIndex);
-//		log.debug("Initial Sentence: {}", initialSentence);
+		// log.debug("Initial Sentence: {}", initialSentence);
 		return initialSentence;
 	}
 
-	private Predicate<Sentence> getSentenceChooser(Queue<Word> words) {
-		List<Word> wordsFilter = new ArrayList<>(words);
-		return (sentence) -> sentence.getWords().equals(wordsFilter);
-	}
+	public String generateText(List<Sentence> sentences, StyleParameters parameters) {
 
-	public String generateText(List<Sentence> sentences, StyleParameters styleParameters) {
-
-		Sentence initialSentence = getInitialSentence(sentences, styleParameters);
+		Sentence initialSentence = getInitialSentence(sentences, parameters);
 
 		TextBuilder builder = new TextBuilder();
 		for (Word word : initialSentence.getWords()) {
@@ -71,17 +73,20 @@ public class TextGenerator {
 		Queue<Word> words = new LinkedList<>(initialSentence.getWords());
 		Word nextWord = WordChooser.INSTANCE.apply(initialSentence);
 		builder.append(nextWord);
-		TextTerminator terminator = getTerminator(styleParameters);
+		TextTerminator terminator = getTerminator(parameters);
 
 		while (!terminator.endText(nextWord)) {
 			words.poll();
 			words.add(nextWord);
-			Sentence sentence = sentences.stream().filter(this.getSentenceChooser(words)).findFirst().get();
-//			log.trace("Sentence: {}", sentence);
+			Sentence sentence = sentences.stream() //
+					.filter((sentence1) -> sentence1.getWords().equals(new ArrayList<>(words))) //
+					.findFirst() //
+					.get();
+			// log.trace("Sentence: {}", sentence);
 			nextWord = WordChooser.INSTANCE.apply(sentence);
-//			log.trace("nextWord: {}", nextWord);
+			// log.trace("nextWord: {}", nextWord);
 			builder.append(nextWord);
-//			log.trace("");
+			// log.trace("");
 		}
 
 		return builder.build();
