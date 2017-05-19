@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import stylegenerator.core.Constants;
 import stylegenerator.core.Sentence;
 import stylegenerator.core.StyleParameters;
+import stylegenerator.textgeneration.TextGenerator;
 
 @Slf4j
 public class Main {
@@ -44,6 +45,16 @@ public class Main {
 				"Wait for end of phrase if Quantity of words is chosen");
 
 		return options;
+	}
+
+	private static StyleParameters commandLineToStyleParameters(CommandLine line) {
+		StyleParameters styleParameters = StyleParameters.builder() //
+				.waitForEndOfText(line.hasOption(WAIT_FOR_END_OF_TEXT)) //
+				.quantityOfWords(line.hasOption(WORDS_QUANTITY_PARAMETER)
+						? Integer.parseInt(line.getOptionValue(WORDS_QUANTITY_PARAMETER)) : null)
+				.waitForEndOfPrhase(line.hasOption(WAIT_FOR_END_OF_PHRASE_PARAMETER)) //
+				.build();
+		return styleParameters;
 	}
 
 	private static List<Sentence> readStyleFile(String filePath)
@@ -84,17 +95,19 @@ public class Main {
 				throw new IllegalArgumentException("Please provide the style file (*.style.json extension)");
 			}
 
-			StyleParameters styleParameters = StyleParameters.builder() //
-					.quantityOfWords(line.hasOption(WORDS_QUANTITY_PARAMETER)
-							? Integer.parseInt(line.getOptionValue(WORDS_QUANTITY_PARAMETER)) : null)
-					.waitForPrhaseEnd(line.hasOption(WAIT_FOR_END_OF_PHRASE_PARAMETER)) //
-					.build();
+			StyleParameters styleParameters = commandLineToStyleParameters(line);
 
 			log.debug(styleParameters.toString());
 
 			List<Sentence> sentences = readStyleFile(line.getOptionValue(FILE_PARAMETER));
 			
-			log.debug(sentences.toString());
+//			log.debug(sentences.toString());
+			
+			TextGenerator textGenerator = new TextGenerator();
+			
+			String text = textGenerator.generateText(sentences, styleParameters);
+			
+			log.debug(text);
 
 			log.info("Finished");
 		} catch (ParseException e) {

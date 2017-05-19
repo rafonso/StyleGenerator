@@ -8,10 +8,12 @@ import lombok.Data;
 public class StyleParameters {
 
 	/* Attributes - BEGIN */
+	
+	private boolean waitForEndOfText;
 
 	private Integer quantityOfWords;
 	
-	private boolean waitForPrhaseEnd;
+	private boolean waitForEndOfPrhase;
 
 	/* Attributes - END */
 

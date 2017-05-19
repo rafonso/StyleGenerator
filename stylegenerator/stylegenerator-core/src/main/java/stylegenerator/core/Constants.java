@@ -2,6 +2,7 @@ package stylegenerator.core;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Random;
 
 public class Constants {
 
@@ -11,6 +12,8 @@ public class Constants {
 
 	public static final String EOL = System.getProperty("line.separator");
 
-	public static final Charset CHARSET = StandardCharsets.ISO_8859_1;
+	public static final Charset CHARSET = StandardCharsets.UTF_8;
+	
+	public static final Random RANDOM = new Random();
 
 }
