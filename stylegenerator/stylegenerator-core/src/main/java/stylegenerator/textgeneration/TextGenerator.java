@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +11,7 @@ import stylegenerator.core.Constants;
 import stylegenerator.core.Sentence;
 import stylegenerator.core.StyleParameters;
 import stylegenerator.core.Word;
+import stylegenerator.textgeneration.firstsentencechooser.FirstSentenceChooserFactory;
 import stylegenerator.textgeneration.terminator.EndOfTextTerminator;
 import stylegenerator.textgeneration.terminator.QuantityOfLinesTerminator;
 import stylegenerator.textgeneration.terminator.QuantityOfPhrasesTerminator;
@@ -21,19 +21,6 @@ import stylegenerator.textgeneration.terminator.TextTerminator;
 
 @Slf4j
 public class TextGenerator {
-
-	private Predicate<Sentence> getStarterFilter(StyleParameters parameters) {
-		if (parameters.isWaitForEndOfText()) {
-			return Sentence::isBot;
-		}
-		if ((parameters.getQuantityOfWords() != null) //
-				|| (parameters.getQuantityOfPhrases() != null) //
-				|| (parameters.getQuantityOfLines() != null)) {
-			return Sentence::isBol;
-		}
-
-		throw new IllegalStateException("No Begin of text filter defined. Parameters: " + parameters);
-	}
 
 	private TextTerminator getTerminator(StyleParameters parameters) {
 		if (parameters.isWaitForEndOfText()) {
@@ -56,15 +43,14 @@ public class TextGenerator {
 	}
 
 	private Sentence getInitialSentence(List<Sentence> sentences, StyleParameters parameters) {
-		List<Sentence> initialsSentences = sentences.stream().filter(getStarterFilter(parameters))
+		List<Sentence> initialsSentences = sentences.stream() //
+				.filter(FirstSentenceChooserFactory.getChooser(parameters)) //
 				.collect(Collectors.toList());
 		// log.debug("Initial Sentences: {}", initialsSentences);
 
 		int initialIndex = Constants.RANDOM.nextInt(initialsSentences.size());
 		// log.debug("index: {}", initialIndex);
-		Sentence initialSentence = initialsSentences.get(initialIndex);
-		// log.debug("Initial Sentence: {}", initialSentence);
-		return initialSentence;
+		return initialsSentences.get(initialIndex);
 	}
 
 	public String generateText(List<Sentence> sentences, StyleParameters parameters) {
