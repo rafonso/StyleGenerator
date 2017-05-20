@@ -33,7 +33,6 @@ public class Main {
 	private static final String LINES_QUANTITY_PARAMETER = "l";
 	private static final String OUTPUT_DIR_PARAMETER = "od";
 	private static final String OUTPUT_FILE_PARAMETER = "of";
-	
 	private static final String HELPER_PARAMETER = "h";
 
 	private static void showOptions(Options options) {
@@ -51,11 +50,31 @@ public class Main {
 				"Wait for end of phrase if Quantity of words is chosen");
 		options.addOption(PHRASES_QUANTITY_PARAMETER, true, "Quantity of phrases to be generated");
 		options.addOption(LINES_QUANTITY_PARAMETER, true, "Quantity of lines to be generated");
-		options.addOption(OUTPUT_DIR_PARAMETER, true, "Output directory (default current directory)");
-		options.addOption(OUTPUT_FILE_PARAMETER, true, "Output file name, with extension '*.generated.txt' (default pattern [STYLE FILE NAME].yyyy-MM-dd-HH-MM-ss)");
+		options.addOption(OUTPUT_DIR_PARAMETER, true, "Output directory (default current directory)."
+				+ " The output file will be generated only this or " + OUTPUT_FILE_PARAMETER + " where passed.");
+		options.addOption(OUTPUT_FILE_PARAMETER, true,
+				"Output file name, with extension '*.generated.txt' (default pattern [STYLE FILE NAME].yyyy-MM-dd-HH-MM-ss)."
+						+ " The output file will be generated only this or " + OUTPUT_DIR_PARAMETER + " where passed.");
 		options.addOption(HELPER_PARAMETER, false, "Prints Usage");
 
 		return options;
+	}
+
+	private static void validateParameters(CommandLine line) {
+		if (!line.hasOption(FILE_PARAMETER)) {
+			throw new IllegalArgumentException("Please provide the style file (*.style.json extension)");
+		}
+		if (!line.hasOption(WAIT_FOR_END_OF_TEXT) //
+				&& !line.hasOption(LINES_QUANTITY_PARAMETER) //
+				&& !line.hasOption(PHRASES_QUANTITY_PARAMETER) //
+				&& !line.hasOption(WORDS_QUANTITY_PARAMETER)) {
+			throw new IllegalArgumentException(String.format(
+					"At least ont of these parameters must be passesd: '%s', '%s', '%s', '%s'", //
+					WAIT_FOR_END_OF_TEXT, //
+					LINES_QUANTITY_PARAMETER, //
+					PHRASES_QUANTITY_PARAMETER, //
+					WORDS_QUANTITY_PARAMETER));
+		}
 	}
 
 	private static Integer commandToInteger(CommandLine line, String parameter) {
@@ -109,7 +128,6 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
-		log.info("Starting ...");
 		long t0 = System.currentTimeMillis();
 
 		CommandLineParser parser = new DefaultParser();
@@ -123,10 +141,9 @@ public class Main {
 				showOptions(options);
 				return;
 			}
-			if (!line.hasOption(FILE_PARAMETER)) {
-				throw new IllegalArgumentException("Please provide the style file (*.style.json extension)");
-			}
+			validateParameters(line);
 
+			log.info("Starting ...");
 			TextParameter parameter = commandLineToStyleParameter(line);
 			log.debug(parameter.toString());
 
@@ -140,6 +157,7 @@ public class Main {
 			log.info("Text generated");
 
 			// TODO: IF to generate output file
+			log.info("Finished. Time: {} ms", (System.currentTimeMillis() - t0));
 		} catch (ParseException e) {
 			log.error("Invalid Command Line: " + e.getMessage(), e);
 			showOptions(options);
@@ -150,7 +168,6 @@ public class Main {
 			log.error(e.getMessage(), e);
 		}
 
-		log.info("Finished. Time: {} ms", (System.currentTimeMillis() - t0));
 
 		if (text != null) {
 			System.out.println(text);
