@@ -21,8 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import stylegenerator.core.Constants;
 import stylegenerator.core.Sentence;
-import stylegenerator.reader.SentencesMerger;
-import stylegenerator.reader.TextFileToSentences;
+import stylegenerator.stylegeneration.SentencesMerger;
+import stylegenerator.stylegeneration.TextFileToSentences;
 
 @Slf4j
 public class Main {

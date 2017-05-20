@@ -1,4 +1,4 @@
-package stylegenerator.reader;
+package stylegenerator.stylegeneration;
 
 import java.util.ArrayList;
 import java.util.Iterator;
