@@ -1,9 +1,9 @@
-package stylegenerator.textgeneration;
+package stylegenerator.textgeneration.terminator;
 
 import stylegenerator.core.Word;
 
 @FunctionalInterface
-interface TextTerminator {
+public interface TextTerminator {
 
 	public boolean endText(Word word);
 

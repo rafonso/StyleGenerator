@@ -1,4 +1,4 @@
-package stylegenerator.textgeneration;
+package stylegenerator.textgeneration.terminator;
 
 import stylegenerator.core.Word;
 

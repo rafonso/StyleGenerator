@@ -12,6 +12,12 @@ import stylegenerator.core.Constants;
 import stylegenerator.core.Sentence;
 import stylegenerator.core.StyleParameters;
 import stylegenerator.core.Word;
+import stylegenerator.textgeneration.terminator.EndOfTextTerminator;
+import stylegenerator.textgeneration.terminator.QuantityOfLinesTerminator;
+import stylegenerator.textgeneration.terminator.QuantityOfPhrasesTerminator;
+import stylegenerator.textgeneration.terminator.QuantityOfWordsEndOfPhraseTerminator;
+import stylegenerator.textgeneration.terminator.QuantityOfWordsTerminator;
+import stylegenerator.textgeneration.terminator.TextTerminator;
 
 @Slf4j
 public class TextGenerator {
