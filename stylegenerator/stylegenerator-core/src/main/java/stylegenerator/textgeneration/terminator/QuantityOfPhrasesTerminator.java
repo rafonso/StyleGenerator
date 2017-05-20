@@ -2,23 +2,10 @@ package stylegenerator.textgeneration.terminator;
 
 import stylegenerator.core.Word;
 
-class QuantityOfPhrasesTerminator implements TextTerminator {
-
-	private final int quantity;
-
-	private int currentPrhasesPosition;
+class QuantityOfPhrasesTerminator extends QuantityTerminator {
 
 	public QuantityOfPhrasesTerminator(int quantity) {
-		this.quantity = quantity;
-		this.currentPrhasesPosition = 0;
-	}
-
-	@Override
-	public boolean endText(Word word) {
-		if (word.isEop()) {
-			this.currentPrhasesPosition++;
-		}
-		return (this.currentPrhasesPosition >= this.quantity);
+		super(quantity, Word::isEop);
 	}
 
 }
