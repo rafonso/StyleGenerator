@@ -18,7 +18,7 @@ public class SentencesMerger implements Collector<List<Sentence>, List<Sentence>
 		for (Sentence sentence : currentSentences) {
 			int index = mergedSentences.indexOf(sentence);
 			if (index >= 0) {
-				mergedSentences.get(index).addSequence(sentence.getSequences().get(0));
+				mergedSentences.get(index).addSequences(sentence.getSequences());
 			} else {
 				mergedSentences.add(sentence);
 			}
