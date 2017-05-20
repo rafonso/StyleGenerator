@@ -31,6 +31,7 @@ public class Main {
 	private static final String WAIT_FOR_END_OF_PHRASE_PARAMETER = "weop";
 	private static final String PHRASES_QUANTITY_PARAMETER = "p";
 	private static final String LINES_QUANTITY_PARAMETER = "l";
+	private static final String HELPER_PARAMETER = "h";
 
 	private static void showOptions(Options options) {
 		HelpFormatter formatter = new HelpFormatter();
@@ -47,6 +48,7 @@ public class Main {
 				"Wait for end of phrase if Quantity of words is chosen");
 		options.addOption(PHRASES_QUANTITY_PARAMETER, true, "Quantity of phrases to be generated");
 		options.addOption(LINES_QUANTITY_PARAMETER, true, "Quantity of lines to be generated");
+		options.addOption(HELPER_PARAMETER, false, "Prints Usage");
 
 		return options;
 	}
@@ -97,16 +99,20 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
-		log.info("Starting ...");
 		CommandLineParser parser = new DefaultParser();
 		Options options = getOptions();
 
 		try {
 			CommandLine line = parser.parse(options, args);
 
+			if (line.hasOption(HELPER_PARAMETER)) {
+				showOptions(options);
+				return;
+			}
 			if (!line.hasOption(FILE_PARAMETER)) {
 				throw new IllegalArgumentException("Please provide the style file (*.style.json extension)");
 			}
+			log.info("Starting ...");
 
 			StyleParameters styleParameters = commandLineToStyleParameters(line);
 
