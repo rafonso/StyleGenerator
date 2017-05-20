@@ -3,22 +3,22 @@ package stylegenerator.textgeneration.firstsentencechooser;
 import java.util.function.Predicate;
 
 import stylegenerator.core.Sentence;
-import stylegenerator.core.StyleParameters;
+import stylegenerator.textgeneration.TextParameter;
 
 public class FirstSentenceChooserFactory {
 	
-	public static Predicate<Sentence> getChooser(StyleParameters parameters) {
+	public static Predicate<Sentence> getChooser(TextParameter parameter) {
 		// TODO Debug mode
-		if (parameters.isWaitForEndOfText()) {
+		if (parameter.isWaitForEndOfText()) {
 			return Sentence::isBot;
 		}
-		if ((parameters.getQuantityOfWords() != null) //
-				|| (parameters.getQuantityOfPhrases() != null) //
-				|| (parameters.getQuantityOfLines() != null)) {
+		if ((parameter.getQuantityOfWords() != null) //
+				|| (parameter.getQuantityOfPhrases() != null) //
+				|| (parameter.getQuantityOfLines() != null)) {
 			return Sentence::isBol;
 		}
 
-		throw new IllegalStateException("No Begin of text filter defined. Parameters: " + parameters);
+		throw new IllegalStateException("No Begin of text filter defined. Parameters: " + parameter);
 	}
 
 }

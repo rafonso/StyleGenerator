@@ -1,11 +1,11 @@
-package stylegenerator.core;
+package stylegenerator.textgeneration;
 
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
-public class StyleParameters {
+public class TextParameter {
 
 	/* Attributes - BEGIN */
 

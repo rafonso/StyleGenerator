@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import stylegenerator.core.Constants;
 import stylegenerator.core.Sentence;
-import stylegenerator.core.StyleParameters;
 import stylegenerator.core.Word;
 import stylegenerator.textgeneration.firstsentencechooser.FirstSentenceChooserFactory;
 import stylegenerator.textgeneration.terminator.TextTerminator;
@@ -18,15 +17,15 @@ import stylegenerator.textgeneration.terminator.TextTerminatorFactory;
 @Slf4j
 public class TextGenerator {
 
-	private StyleParameters parameters;
+	private TextParameter parameter;
 
-	public TextGenerator(StyleParameters parameters) {
-		this.parameters = parameters;
+	public TextGenerator(TextParameter parameter) {
+		this.parameter = parameter;
 	}
 
 	private Sentence getInitialSentence(List<Sentence> sentences) {
 		List<Sentence> initialsSentences = sentences.stream() //
-				.filter(FirstSentenceChooserFactory.getChooser(parameters)) //
+				.filter(FirstSentenceChooserFactory.getChooser(parameter)) //
 				.collect(Collectors.toList());
 		// log.debug("Initial Sentences: {}", initialsSentences);
 
@@ -47,7 +46,7 @@ public class TextGenerator {
 		Queue<Word> words = new LinkedList<>(initialSentence.getWords());
 		Word nextWord = WordChooser.INSTANCE.apply(initialSentence);
 		builder.append(nextWord);
-		TextTerminator terminator = TextTerminatorFactory.getTerminator(parameters);
+		TextTerminator terminator = TextTerminatorFactory.getTerminator(parameter);
 
 		while (!terminator.endText(nextWord)) {
 			words.poll();

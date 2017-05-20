@@ -1,27 +1,27 @@
 package stylegenerator.textgeneration.terminator;
 
-import stylegenerator.core.StyleParameters;
+import stylegenerator.textgeneration.TextParameter;
 
 public class TextTerminatorFactory {
 
-	public static TextTerminator getTerminator(StyleParameters parameters) {
-		if (parameters.isWaitForEndOfText()) {
+	public static TextTerminator getTerminator(TextParameter parameter) {
+		if (parameter.isWaitForEndOfText()) {
 			return new EndOfTextTerminator();
 		}
-		if (parameters.getQuantityOfWords() != null) {
-			if (parameters.isWaitForEndOfPrhase()) {
-				return new QuantityOfWordsEndOfPhraseTerminator(parameters.getQuantityOfWords());
+		if (parameter.getQuantityOfWords() != null) {
+			if (parameter.isWaitForEndOfPrhase()) {
+				return new QuantityOfWordsEndOfPhraseTerminator(parameter.getQuantityOfWords());
 			}
-			return new QuantityOfWordsTerminator(parameters.getQuantityOfWords());
+			return new QuantityOfWordsTerminator(parameter.getQuantityOfWords());
 		}
-		if (parameters.getQuantityOfPhrases() != null) {
-			return new QuantityOfPhrasesTerminator(parameters.getQuantityOfPhrases());
+		if (parameter.getQuantityOfPhrases() != null) {
+			return new QuantityOfPhrasesTerminator(parameter.getQuantityOfPhrases());
 		}
-		if (parameters.getQuantityOfLines() != null) {
-			return new QuantityOfLinesTerminator(parameters.getQuantityOfLines());
+		if (parameter.getQuantityOfLines() != null) {
+			return new QuantityOfLinesTerminator(parameter.getQuantityOfLines());
 		}
 
-		throw new IllegalStateException("No text terminator defined. Parameters: " + parameters);
+		throw new IllegalStateException("No text terminator defined. Parameters: " + parameter);
 	}
 
 }

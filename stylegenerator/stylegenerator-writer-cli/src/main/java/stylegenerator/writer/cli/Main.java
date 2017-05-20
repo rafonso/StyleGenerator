@@ -19,8 +19,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import stylegenerator.core.Constants;
 import stylegenerator.core.Sentence;
-import stylegenerator.core.StyleParameters;
 import stylegenerator.textgeneration.TextGenerator;
+import stylegenerator.textgeneration.TextParameter;
 
 @Slf4j
 public class Main {
@@ -31,6 +31,9 @@ public class Main {
 	private static final String WAIT_FOR_END_OF_PHRASE_PARAMETER = "weop";
 	private static final String PHRASES_QUANTITY_PARAMETER = "p";
 	private static final String LINES_QUANTITY_PARAMETER = "l";
+	private static final String OUTPUT_DIR_PARAMETER = "od";
+	private static final String OUTPUT_FILE_PARAMETER = "of";
+	
 	private static final String HELPER_PARAMETER = "h";
 
 	private static void showOptions(Options options) {
@@ -48,6 +51,8 @@ public class Main {
 				"Wait for end of phrase if Quantity of words is chosen");
 		options.addOption(PHRASES_QUANTITY_PARAMETER, true, "Quantity of phrases to be generated");
 		options.addOption(LINES_QUANTITY_PARAMETER, true, "Quantity of lines to be generated");
+		options.addOption(OUTPUT_DIR_PARAMETER, true, "Output directory (default current directory)");
+		options.addOption(OUTPUT_FILE_PARAMETER, true, "Output file name, with extension '*.generated.txt' (default pattern [STYLE FILE NAME].yyyy-MM-dd-HH-MM-ss)");
 		options.addOption(HELPER_PARAMETER, false, "Prints Usage");
 
 		return options;
@@ -67,8 +72,8 @@ public class Main {
 		return result;
 	}
 
-	private static StyleParameters commandLineToStyleParameters(CommandLine line) {
-		return StyleParameters.builder() //
+	private static TextParameter commandLineToStyleParameter(CommandLine line) {
+		return TextParameter.builder() //
 				.waitForEndOfText(line.hasOption(WAIT_FOR_END_OF_TEXT)) //
 				.quantityOfWords(commandToInteger(line, WORDS_QUANTITY_PARAMETER))
 				.waitForEndOfPrhase(line.hasOption(WAIT_FOR_END_OF_PHRASE_PARAMETER)) //
@@ -122,13 +127,13 @@ public class Main {
 				throw new IllegalArgumentException("Please provide the style file (*.style.json extension)");
 			}
 
-			StyleParameters styleParameters = commandLineToStyleParameters(line);
-			log.debug(styleParameters.toString());
+			TextParameter parameter = commandLineToStyleParameter(line);
+			log.debug(parameter.toString());
 
 			log.info("Reading Style file.");
 			List<Sentence> sentences = readStyleFile(line.getOptionValue(FILE_PARAMETER));
 
-			TextGenerator textGenerator = new TextGenerator(styleParameters);
+			TextGenerator textGenerator = new TextGenerator(parameter);
 
 			log.info("Generating text");
 			text = textGenerator.generateText(sentences);
