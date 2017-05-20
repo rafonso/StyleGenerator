@@ -23,6 +23,8 @@ import stylegenerator.core.Constants;
 import stylegenerator.core.Sentence;
 import stylegenerator.stylegeneration.SentencesMerger;
 import stylegenerator.stylegeneration.TextFileToSentences;
+import stylegenerator.stylegeneration.io.DirPathToFilesPath;
+import stylegenerator.stylegeneration.io.PathToTextFileFunction;
 
 @Slf4j
 public class Main {
@@ -96,8 +98,6 @@ public class Main {
 					.map(new PathToTextFileFunction()) //
 					.map(new TextFileToSentences(coherence)) //
 					.collect(new SentencesMerger());
-
-			sentences.stream().filter(s -> s.getSequences().size() > 1).forEach(System.out::println);
 
 			ObjectMapper mapper = new ObjectMapper();
 

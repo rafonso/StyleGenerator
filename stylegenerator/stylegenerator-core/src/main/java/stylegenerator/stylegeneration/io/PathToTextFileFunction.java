@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.stylegenerator.reader.cli;
+package stylegenerator.stylegeneration.io;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.util.function.Function;
 
 import stylegenerator.core.Constants;
-import stylegenerator.core.TextFile;
 
 /**
  * @author rucaf_000

@@ -1,4 +1,4 @@
-package org.stylegenerator.reader.cli;
+package stylegenerator.stylegeneration.io;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;

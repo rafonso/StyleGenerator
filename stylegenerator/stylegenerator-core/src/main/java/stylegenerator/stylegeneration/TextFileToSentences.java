@@ -11,8 +11,8 @@ import java.util.stream.Stream;
 
 import stylegenerator.core.Constants;
 import stylegenerator.core.Sentence;
-import stylegenerator.core.TextFile;
 import stylegenerator.core.Word;
+import stylegenerator.stylegeneration.io.TextFile;
 
 public class TextFileToSentences implements Function<TextFile, List<Sentence>> {
 

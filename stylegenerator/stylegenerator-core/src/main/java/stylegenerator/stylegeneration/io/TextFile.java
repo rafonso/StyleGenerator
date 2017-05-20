@@ -1,4 +1,4 @@
-package stylegenerator.core;
+package stylegenerator.stylegeneration.io;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
