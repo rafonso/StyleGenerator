@@ -14,7 +14,7 @@ public class Constants {
 
 	public static final String EOL = System.getProperty("line.separator");
 
-	public static final Charset CHARSET = StandardCharsets.ISO_8859_1;
+	public static final Charset CHARSET = StandardCharsets.UTF_8;
 	
 	public static final Random RANDOM = new Random();
 

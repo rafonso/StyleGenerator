@@ -8,15 +8,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Function;
 
+import lombok.extern.slf4j.Slf4j;
 import stylegenerator.core.Constants;
 
-/**
- * @author rucaf_000
- *
- */
+@Slf4j
 public class PathToTextFileFunction implements Function<Path, TextFile> {
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.util.function.Function#apply(java.lang.Object)
 	 */
 	@Override
@@ -26,6 +26,7 @@ public class PathToTextFileFunction implements Function<Path, TextFile> {
 		}
 
 		try {
+			log.debug("Reading file {}", file);
 			return new TextFile(file.getFileName().toString(),
 					new String(Files.readAllBytes(file), Constants.CHARSET).trim());
 		} catch (IOException e) {

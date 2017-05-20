@@ -9,11 +9,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import lombok.extern.slf4j.Slf4j;
 import stylegenerator.core.Constants;
 import stylegenerator.core.Sentence;
 import stylegenerator.core.Word;
 import stylegenerator.stylegeneration.io.TextFile;
 
+@Slf4j
 public class TextFileToSentences implements Function<TextFile, List<Sentence>> {
 
 	private final int coherence;
@@ -88,6 +90,8 @@ public class TextFileToSentences implements Function<TextFile, List<Sentence>> {
 
 	@Override
 	public List<Sentence> apply(TextFile textFile) {
+		log.debug("Processing " + textFile);
+
 		List<String> tokens = Stream.of(textFile.getText().split(Constants.EOL)) //
 				.map(String::trim) //
 				.flatMap(this::lineToTokens) //

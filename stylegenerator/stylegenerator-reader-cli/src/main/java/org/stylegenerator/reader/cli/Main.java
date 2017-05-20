@@ -34,6 +34,7 @@ public class Main {
 	private static final String FILE_PARAMETER = "f";
 	private static final String OUTPUT_DIR_PARAMETER = "od";
 	private static final String OUTPUT_FILE_PARAMETER = "of";
+	private static final String HELPER_PARAMETER = "h";
 
 	private static void showOptions(Options options) {
 		HelpFormatter formatter = new HelpFormatter();
@@ -49,8 +50,15 @@ public class Main {
 		options.addOption(OUTPUT_DIR_PARAMETER, true, "Output directory (default current directory)");
 		options.addOption(OUTPUT_FILE_PARAMETER, true,
 				"Output file name, with extension '*.style.json' (default pattern yyyy-MM-dd-HH-MM-ss)");
+		options.addOption(HELPER_PARAMETER, false, "Prints Usage");
 
 		return options;
+	}
+
+	private static void validateParameters(CommandLine line) {
+		if (!line.hasOption(FILE_PARAMETER) && !line.hasOption(DIR_PARAMETER)) {
+			throw new IllegalArgumentException("Please provide at least one file or directory");
+		}
 	}
 
 	private static File prepareOutputFile(String dirPath, String fileName, int coherence) {
@@ -68,17 +76,23 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
-		log.info("Starting ...");
-		CommandLineParser parser = new DefaultParser();
+		System.setProperty("file.encoding", Constants.CHARSET.name());
+
+		long t0 = System.currentTimeMillis();
+
 		Options options = getOptions();
 
 		try {
+			CommandLineParser parser = new DefaultParser();
 			CommandLine line = parser.parse(options, args);
 
-			if (!line.hasOption(FILE_PARAMETER) && !line.hasOption(DIR_PARAMETER)) {
-				throw new IllegalArgumentException("Please provide at least one file or directory");
+			if (line.hasOption(HELPER_PARAMETER)) {
+				showOptions(options);
+				return;
 			}
+			validateParameters(line);
 
+			log.info("Starting ...");
 			Integer coherence = Integer.valueOf(line.getOptionValue(COHERENCE_PARAMETER, "3"));
 			File outputFile = prepareOutputFile(line.getOptionValue(OUTPUT_DIR_PARAMETER),
 					line.getOptionValue(OUTPUT_FILE_PARAMETER), coherence);
@@ -88,24 +102,21 @@ public class Main {
 			List<String> directoriesNames = line.hasOption(DIR_PARAMETER)
 					? Arrays.asList(line.getOptionValues(DIR_PARAMETER)) : Collections.<String> emptyList();
 
-			log.debug(filesNames.toString());
-			log.debug(directoriesNames.toString());
-
-
+			log.info("Processing files. Coherence Level: {}", coherence);
 			List<Sentence> sentences = Stream //
 					.concat(filesNames.stream(), directoriesNames.stream().flatMap(new DirPathToFilesPath())) //
 					.map(Paths::get) //
 					.map(new PathToTextFileFunction()) //
 					.map(new TextFileToSentences(coherence)) //
 					.collect(new SentencesMerger());
+			log.info("Files Processed. Numeber of sentences: {}", sentences.size());
 
+			log.info("Recording Style File");
 			ObjectMapper mapper = new ObjectMapper();
-
 			mapper.writerWithDefaultPrettyPrinter().writeValue(outputFile, sentences);
-
 			log.info("Style file {} Created", outputFile.getAbsolutePath());
 
-			log.info("Finished");
+			log.info("Finished. Time: {} ms", (System.currentTimeMillis() - t0));
 		} catch (ParseException e) {
 			log.error("Invalid Command Line: " + e.getMessage(), e);
 			showOptions(options);
