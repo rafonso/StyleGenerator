@@ -54,22 +54,27 @@ public class Main {
 	}
 
 	private static Integer commandToInteger(CommandLine line, String parameter) {
+		Integer result = null;
 		if (line.hasOption(parameter)) {
-			return Integer.parseInt(line.getOptionValue(parameter));
+			String parameterValue = line.getOptionValue(parameter);
+			try {
+				result = Integer.parseInt(parameterValue);
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException("Invalid value for parameter " + parameter + ": " + parameterValue);
+			}
 		}
 
-		return null;
+		return result;
 	}
 
 	private static StyleParameters commandLineToStyleParameters(CommandLine line) {
-		StyleParameters styleParameters = StyleParameters.builder() //
+		return StyleParameters.builder() //
 				.waitForEndOfText(line.hasOption(WAIT_FOR_END_OF_TEXT)) //
 				.quantityOfWords(commandToInteger(line, WORDS_QUANTITY_PARAMETER))
 				.waitForEndOfPrhase(line.hasOption(WAIT_FOR_END_OF_PHRASE_PARAMETER)) //
 				.quantityOfPhrases(commandToInteger(line, PHRASES_QUANTITY_PARAMETER))
 				.quantityOfLines(commandToInteger(line, LINES_QUANTITY_PARAMETER)) //
 				.build();
-		return styleParameters;
 	}
 
 	private static List<Sentence> readStyleFile(String filePath)
@@ -99,8 +104,12 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
+		log.info("Starting ...");
+		long t0 = System.currentTimeMillis();
+
 		CommandLineParser parser = new DefaultParser();
 		Options options = getOptions();
+		String text = null;
 
 		try {
 			CommandLine line = parser.parse(options, args);
@@ -112,23 +121,20 @@ public class Main {
 			if (!line.hasOption(FILE_PARAMETER)) {
 				throw new IllegalArgumentException("Please provide the style file (*.style.json extension)");
 			}
-			log.info("Starting ...");
 
 			StyleParameters styleParameters = commandLineToStyleParameters(line);
-
 			log.debug(styleParameters.toString());
 
+			log.info("Reading Style file.");
 			List<Sentence> sentences = readStyleFile(line.getOptionValue(FILE_PARAMETER));
-
-			// log.debug(sentences.toString());
 
 			TextGenerator textGenerator = new TextGenerator(styleParameters);
 
-			String text = textGenerator.generateText(sentences);
+			log.info("Generating text");
+			text = textGenerator.generateText(sentences);
+			log.info("Text generated");
 
-			log.debug(text);
-
-			log.info("Finished");
+			// TODO: IF to generate output file
 		} catch (ParseException e) {
 			log.error("Invalid Command Line: " + e.getMessage(), e);
 			showOptions(options);
@@ -137,6 +143,12 @@ public class Main {
 			showOptions(options);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
+		}
+
+		log.info("Finished. Time: {} ms", (System.currentTimeMillis() - t0));
+
+		if (text != null) {
+			System.out.println(text);
 		}
 	}
 
