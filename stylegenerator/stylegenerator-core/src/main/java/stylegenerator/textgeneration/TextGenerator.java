@@ -1,6 +1,5 @@
 package stylegenerator.textgeneration;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -17,7 +16,7 @@ import stylegenerator.textgeneration.terminator.TextTerminatorFactory;
 @Slf4j
 public class TextGenerator {
 
-	private TextParameter parameter;
+	private final TextParameter parameter;
 
 	public TextGenerator(TextParameter parameter) {
 		this.parameter = parameter;
@@ -27,40 +26,52 @@ public class TextGenerator {
 		List<Sentence> initialsSentences = sentences.stream() //
 				.filter(FirstSentenceChooserFactory.getChooser(parameter)) //
 				.collect(Collectors.toList());
-		// log.debug("Initial Sentences: {}", initialsSentences);
 
 		int initialIndex = Constants.RANDOM.nextInt(initialsSentences.size());
-		// log.debug("index: {}", initialIndex);
 		return initialsSentences.get(initialIndex);
+	}
+
+	private Word getNextWord(Sentence sentence, TextTracer tracer) {
+		int nextPosition = (sentence.getSequences().size() == 1) ? //
+				0 : //
+				Constants.RANDOM.nextInt(sentence.getSequences().size());
+		Word nextWord = sentence.getSequences().get(nextPosition);
+
+		tracer.addSequence(nextPosition);
+		tracer.setLastWord(nextWord);
+
+		return nextWord;
 	}
 
 	public String generateText(List<Sentence> sentences) {
 
 		Sentence initialSentence = getInitialSentence(sentences);
 
-		TextBuilder builder = new TextBuilder();
-		for (Word word : initialSentence.getWords()) {
-			builder.append(word);
-		}
+		TextBuilder builder = initialSentence.getWords().stream() //
+				.collect(TextBuilder::new, (tb, word) -> tb.append(word), (a, b) -> {
+				});
 
 		Queue<Word> words = new LinkedList<>(initialSentence.getWords());
-		Word nextWord = WordChooser.INSTANCE.apply(initialSentence);
-		builder.append(nextWord);
-		TextTerminator terminator = TextTerminatorFactory.getTerminator(parameter);
+		TextTracer tracer = new TextTracer(initialSentence.getWords());
 
+		Word nextWord = getNextWord(initialSentence, tracer);
+		builder.append(nextWord);
+
+		TextTerminator terminator = TextTerminatorFactory.getTerminator(parameter);
 		while (!terminator.endText(nextWord)) {
 			words.poll();
 			words.add(nextWord);
+
 			Sentence sentence = sentences.stream() //
-					.filter((sentence1) -> sentence1.getWords().equals(new ArrayList<>(words))) //
+					.filter((s) -> s.getWords().equals(words)) //
 					.findFirst() //
 					.get();
-			// log.trace("Sentence: {}", sentence);
-			nextWord = WordChooser.INSTANCE.apply(sentence);
-			// log.trace("nextWord: {}", nextWord);
+
+			nextWord = getNextWord(sentence, tracer);
 			builder.append(nextWord);
-			// log.trace("");
 		}
+
+		log.debug(tracer.toString());
 
 		return builder.build();
 	}
