@@ -12,35 +12,11 @@ import stylegenerator.core.Sentence;
 import stylegenerator.core.StyleParameters;
 import stylegenerator.core.Word;
 import stylegenerator.textgeneration.firstsentencechooser.FirstSentenceChooserFactory;
-import stylegenerator.textgeneration.terminator.EndOfTextTerminator;
-import stylegenerator.textgeneration.terminator.QuantityOfLinesTerminator;
-import stylegenerator.textgeneration.terminator.QuantityOfPhrasesTerminator;
-import stylegenerator.textgeneration.terminator.QuantityOfWordsEndOfPhraseTerminator;
-import stylegenerator.textgeneration.terminator.QuantityOfWordsTerminator;
 import stylegenerator.textgeneration.terminator.TextTerminator;
+import stylegenerator.textgeneration.terminator.TextTerminatorFactory;
 
 @Slf4j
 public class TextGenerator {
-
-	private TextTerminator getTerminator(StyleParameters parameters) {
-		if (parameters.isWaitForEndOfText()) {
-			return new EndOfTextTerminator();
-		}
-		if (parameters.getQuantityOfWords() != null) {
-			if (parameters.isWaitForEndOfPrhase()) {
-				return new QuantityOfWordsEndOfPhraseTerminator(parameters.getQuantityOfWords());
-			}
-			return new QuantityOfWordsTerminator(parameters.getQuantityOfWords());
-		}
-		if (parameters.getQuantityOfPhrases() != null) {
-			return new QuantityOfPhrasesTerminator(parameters.getQuantityOfPhrases());
-		}
-		if (parameters.getQuantityOfLines() != null) {
-			return new QuantityOfLinesTerminator(parameters.getQuantityOfLines());
-		}
-
-		throw new IllegalStateException("No text terminator defined. Parameters: " + parameters);
-	}
 
 	private Sentence getInitialSentence(List<Sentence> sentences, StyleParameters parameters) {
 		List<Sentence> initialsSentences = sentences.stream() //
@@ -65,7 +41,7 @@ public class TextGenerator {
 		Queue<Word> words = new LinkedList<>(initialSentence.getWords());
 		Word nextWord = WordChooser.INSTANCE.apply(initialSentence);
 		builder.append(nextWord);
-		TextTerminator terminator = getTerminator(parameters);
+		TextTerminator terminator = TextTerminatorFactory.getTerminator(parameters);
 
 		while (!terminator.endText(nextWord)) {
 			words.poll();

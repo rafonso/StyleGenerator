@@ -2,7 +2,7 @@ package stylegenerator.textgeneration.terminator;
 
 import stylegenerator.core.Word;
 
-public class QuantityOfWordsTerminator implements TextTerminator {
+class QuantityOfWordsTerminator implements TextTerminator {
 
 	private final int quantity;
 

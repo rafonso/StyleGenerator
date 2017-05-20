@@ -2,7 +2,7 @@ package stylegenerator.textgeneration.terminator;
 
 import stylegenerator.core.Word;
 
-public class EndOfTextTerminator implements TextTerminator {
+class EndOfTextTerminator implements TextTerminator {
 
 	@Override
 	public boolean endText(Word word) {

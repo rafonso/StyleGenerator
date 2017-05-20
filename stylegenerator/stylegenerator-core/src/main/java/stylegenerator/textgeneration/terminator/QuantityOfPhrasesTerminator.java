@@ -2,7 +2,7 @@ package stylegenerator.textgeneration.terminator;
 
 import stylegenerator.core.Word;
 
-public class QuantityOfPhrasesTerminator implements TextTerminator {
+class QuantityOfPhrasesTerminator implements TextTerminator {
 
 	private final int quantity;
 

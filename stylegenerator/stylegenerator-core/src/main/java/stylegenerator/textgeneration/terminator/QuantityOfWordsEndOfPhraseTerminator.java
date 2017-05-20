@@ -2,7 +2,7 @@ package stylegenerator.textgeneration.terminator;
 
 import stylegenerator.core.Word;
 
-public class QuantityOfWordsEndOfPhraseTerminator extends QuantityOfWordsTerminator {
+class QuantityOfWordsEndOfPhraseTerminator extends QuantityOfWordsTerminator {
 
 	public QuantityOfWordsEndOfPhraseTerminator(int quantity) {
 		super(quantity);
