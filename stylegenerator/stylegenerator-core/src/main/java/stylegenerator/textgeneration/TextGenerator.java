@@ -18,7 +18,13 @@ import stylegenerator.textgeneration.terminator.TextTerminatorFactory;
 @Slf4j
 public class TextGenerator {
 
-	private Sentence getInitialSentence(List<Sentence> sentences, StyleParameters parameters) {
+	private StyleParameters parameters;
+
+	public TextGenerator(StyleParameters parameters) {
+		this.parameters = parameters;
+	}
+
+	private Sentence getInitialSentence(List<Sentence> sentences) {
 		List<Sentence> initialsSentences = sentences.stream() //
 				.filter(FirstSentenceChooserFactory.getChooser(parameters)) //
 				.collect(Collectors.toList());
@@ -29,9 +35,9 @@ public class TextGenerator {
 		return initialsSentences.get(initialIndex);
 	}
 
-	public String generateText(List<Sentence> sentences, StyleParameters parameters) {
+	public String generateText(List<Sentence> sentences) {
 
-		Sentence initialSentence = getInitialSentence(sentences, parameters);
+		Sentence initialSentence = getInitialSentence(sentences);
 
 		TextBuilder builder = new TextBuilder();
 		for (Word word : initialSentence.getWords()) {

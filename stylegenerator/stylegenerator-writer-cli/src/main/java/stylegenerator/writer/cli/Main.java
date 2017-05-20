@@ -122,9 +122,9 @@ public class Main {
 
 			// log.debug(sentences.toString());
 
-			TextGenerator textGenerator = new TextGenerator();
+			TextGenerator textGenerator = new TextGenerator(styleParameters);
 
-			String text = textGenerator.generateText(sentences, styleParameters);
+			String text = textGenerator.generateText(sentences);
 
 			log.debug(text);
 

@@ -1,6 +1,5 @@
 package stylegenerator.textgeneration;
 
-import java.util.List;
 import java.util.function.Function;
 
 import stylegenerator.core.Constants;
