@@ -1,4 +1,4 @@
-package stylegenerator.writer.cli;
+package stylegenerator.textgeneration.cli;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +29,7 @@ import stylegenerator.textgeneration.TextGenerator;
 import stylegenerator.textgeneration.TextParameter;
 
 @Slf4j
-public class Main {
+public class TextGeneration {
 
 	private static final String STYLE_FILE_DESCRIPTION = "*.nn" + Constants.GENERATED_FILE_EXTENSION
 			+ " extension, where 'nn' is the coherence level";

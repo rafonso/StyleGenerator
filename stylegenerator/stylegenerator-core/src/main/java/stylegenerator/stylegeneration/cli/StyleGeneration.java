@@ -1,4 +1,4 @@
-package org.stylegenerator.reader.cli;
+package stylegenerator.stylegeneration.cli;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -27,7 +27,7 @@ import stylegenerator.stylegeneration.io.DirPathToFilesPath;
 import stylegenerator.stylegeneration.io.PathToTextFileFunction;
 
 @Slf4j
-public class Main {
+public class StyleGeneration {
 
 	private static final String COHERENCE_PARAMETER = "c";
 	private static final String DIR_PARAMETER = "d";
