@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,16 +20,22 @@ public class Word implements Comparable<Word> {
 
 	private String value;
 
+	@JsonInclude(value = Include.NON_DEFAULT)
 	private boolean bot;
 
+	@JsonInclude(value = Include.NON_DEFAULT)
 	private boolean bol;
 
+	@JsonInclude(value = Include.NON_DEFAULT)
 	private boolean bop;
 
+	@JsonInclude(value = Include.NON_DEFAULT)
 	private boolean eop;
 
+	@JsonInclude(value = Include.NON_DEFAULT)
 	private boolean eol;
 
+	@JsonInclude(value = Include.NON_DEFAULT)
 	private boolean eot;
 
 	public Word(String value) {
@@ -74,8 +83,8 @@ public class Word implements Comparable<Word> {
 		appendFlag(eop, "EOP", flags);
 		appendFlag(eol, "EOL", flags);
 		appendFlag(eot, "EOT", flags);
-		
-		String strFlags = flags.isEmpty()? "": flags.stream().collect(Collectors.joining(", ", "(", ")"));
+
+		String strFlags = flags.isEmpty() ? "" : flags.stream().collect(Collectors.joining(", ", "(", ")"));
 
 		return "'" + value + "'" + strFlags;
 	}
