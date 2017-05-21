@@ -41,8 +41,8 @@ public class Word implements Comparable<Word> {
 
 	@Override
 	public int compareTo(Word o) {
-		if (this.value.equals(o.value)) {
-			return this.value.compareTo(o.value);
+		if (!this.value.equalsIgnoreCase(o.value)) {
+			return this.value.compareToIgnoreCase(o.value);
 		}
 		if (this.bot != o.bot) {
 			return this.bot ? 1 : -1;

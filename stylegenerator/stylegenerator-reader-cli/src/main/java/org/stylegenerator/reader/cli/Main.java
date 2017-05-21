@@ -108,6 +108,7 @@ public class Main {
 					.map(Paths::get) //
 					.map(new PathToTextFileFunction()) //
 					.map(new TextFileToSentences(coherence)) //
+					.flatMap(List::stream) //
 					.collect(new SentencesMerger());
 			log.info("Files Processed. Numeber of sentences: {}", sentences.size());
 

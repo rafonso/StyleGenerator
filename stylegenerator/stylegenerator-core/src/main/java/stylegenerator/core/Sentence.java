@@ -7,11 +7,9 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
-@EqualsAndHashCode(exclude = "sequences")
 @NoArgsConstructor
 public class Sentence implements Comparable<Sentence> {
 
@@ -65,18 +63,32 @@ public class Sentence implements Comparable<Sentence> {
 	}
 
 	public int compareTo(Sentence other) {
-		if (this.words.size() != other.words.size()) {
-			throw new IllegalStateException();
-		}
+		return new WordsListComparator().compare(this.words, other.words);
+	}
 
-		for (int i = 0; i < this.words.size(); i++) {
-			int diff = this.words.get(i).compareTo(other.words.get(i));
-			if (diff != 0) {
-				return diff;
-			}
-		}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Sentence other = (Sentence) obj;
+		if (words == null) {
+			if (other.words != null)
+				return false;
+		} else if (!words.equals(other.words))
+			return false;
+		return true;
+	}
 
-		return 0;
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((words == null) ? 0 : words.hashCode());
+		return result;
 	}
 
 	/* HELPER METHODS - END */
