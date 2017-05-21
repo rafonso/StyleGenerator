@@ -79,7 +79,7 @@ public class TextFileToSentences implements Function<TextFile, List<Sentence>> {
 	}
 
 	private Stream<String> lineToTokens(String line) {
-		String[] words = line.split("(\\s|" + Constants.EOL + ")+");
+		String[] words = line.split("\\s+");
 		for (int i = 0; i < words.length; i++) {
 			words[i] = words[i].trim();
 		}
@@ -93,7 +93,6 @@ public class TextFileToSentences implements Function<TextFile, List<Sentence>> {
 		log.debug("Processing " + textFile);
 
 		List<String> tokens = Stream.of(textFile.getText().split(Constants.EOL)) //
-				.map(String::trim) //
 				.filter(str -> str.length() > 0)
 				.flatMap(this::lineToTokens) //
 				.collect(Collectors.toList());
