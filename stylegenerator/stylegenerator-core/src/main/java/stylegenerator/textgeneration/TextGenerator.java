@@ -38,6 +38,10 @@ public class TextGenerator {
 				Constants.RANDOM.nextInt(sentence.getSequences().size());
 		Word nextWord = sentence.getSequences().get(nextPosition);
 
+		log.trace("Words: {}, Randomicity: {}, Sequences: {}", sentence.getWords(), sentence.getRandomcity(),
+				sentence.getSequences());
+		log.trace("sequence[{}] = {}", nextPosition, nextWord);
+
 		tracer.addSequence(nextPosition);
 
 		return nextWord;

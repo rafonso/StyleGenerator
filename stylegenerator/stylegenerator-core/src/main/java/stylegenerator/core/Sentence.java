@@ -34,7 +34,7 @@ public class Sentence implements Comparable<Sentence> {
 	}
 
 	/* Getters & Setters - BEGIN */
-	
+
 	@JsonIgnore
 	public boolean isBot() {
 		return getFirstWord().isBot();
@@ -89,6 +89,10 @@ public class Sentence implements Comparable<Sentence> {
 		int result = 1;
 		result = prime * result + ((words == null) ? 0 : words.hashCode());
 		return result;
+	}
+
+	public int getRandomcity() {
+		return this.sequences.size() - 1;
 	}
 
 	/* HELPER METHODS - END */
