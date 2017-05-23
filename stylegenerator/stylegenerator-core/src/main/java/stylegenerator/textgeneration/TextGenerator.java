@@ -32,13 +32,13 @@ public class TextGenerator {
 		return initialsSentences.get(initialIndex);
 	}
 
-	private Word getNextWord(Sentence sentence, TextTracer tracer) {
+	private Word getNextWord(Sentence sentence, TextInfo tracer) {
 		int nextPosition = (sentence.getSequences().size() == 1) ? //
 				0 : //
 				Constants.RANDOM.nextInt(sentence.getSequences().size());
 		Word nextWord = sentence.getSequences().get(nextPosition);
 
-		log.trace("Words: {}, Randomicity: {}, Sequences: {}", sentence.getWords(), sentence.getRandomcity(),
+		log.trace("Words: {}, Randomicity: {}, Sequences: {}", sentence.getWords(), sentence.getRandomness(),
 				sentence.getSequences());
 		log.trace("sequence[{}] = {}", nextPosition, nextWord);
 
@@ -55,7 +55,7 @@ public class TextGenerator {
 				});
 
 		Queue<Word> words = new LinkedList<>(sentence.getWords());
-		TextTracer tracer = new TextTracer(sentence);
+		TextInfo tracer = new TextInfo(sentence);
 
 		try {
 			Word nextWord = getNextWord(sentence, tracer);
@@ -72,6 +72,7 @@ public class TextGenerator {
 						.filter((s) -> s.getWords().equals(words)) //
 						.findFirst() //
 						.get();
+				tracer.addRandomness(sentence.getRandomness());
 
 				nextWord = getNextWord(sentence, tracer);
 				builder.append(nextWord);

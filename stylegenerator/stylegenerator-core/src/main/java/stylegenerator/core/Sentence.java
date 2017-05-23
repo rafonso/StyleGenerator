@@ -91,7 +91,7 @@ public class Sentence implements Comparable<Sentence> {
 		return result;
 	}
 
-	public int getRandomcity() {
+	public int getRandomness() {
 		return this.sequences.size() - 1;
 	}
 
