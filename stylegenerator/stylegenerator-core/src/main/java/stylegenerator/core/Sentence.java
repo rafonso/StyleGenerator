@@ -2,6 +2,7 @@ package stylegenerator.core;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -91,8 +92,9 @@ public class Sentence implements Comparable<Sentence> {
 		return result;
 	}
 
+	@JsonIgnore
 	public int getRandomness() {
-		return this.sequences.size() - 1;
+		return new HashSet<>(this.sequences).size() - 1;
 	}
 
 	/* HELPER METHODS - END */
