@@ -97,6 +97,10 @@ public class Sentence implements Comparable<Sentence> {
 		return new HashSet<>(this.sequences).size() - 1;
 	}
 
+	public boolean sameWords(List<Word> otherWords) {
+		return this.words.equals(otherWords);
+	}
+
 	/* HELPER METHODS - END */
 
 }
